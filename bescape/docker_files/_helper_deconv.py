@@ -41,19 +41,26 @@ def load_gep():
 def load_input_sc():
     """Load input for singe-cell based deconvolution methods ['music', 'scdc']"""
     f = os.listdir(DIR_INPUT)[0]
-    path_gep = os.path.join(DIR_INPUT, f)
+    file_input  = os.path.join(DIR_INPUT, f)
+    return None
 
 
 def get_input_eset_file():
     """Load bulk rna file path to be deconvoluted. This is for R based methods ['music', 'scdc'] - file as eset class"""
     f = os.listdir(DIR_INPUT)[0]
-    path_gep = os.path.join(DIR_INPUT, f)
+    path_input = os.path.join(DIR_INPUT, f)
+
+    return path_input
 
 
 def get_gep_eset_file():
     """Load eset single cell expression file path for R based deconvolution methods ['music', 'scdc'].
        It only passes the full path of the gep eset file to the R-script. """
-    f = os.listdir(DIR_GEP)[0]
+    try:
+        f = os.listdir(DIR_GEP)[0]
+    except FileNotFoundError:
+        print('GEP directory is empty, need to provide an annotation file')
+        
     file_gep = os.path.join(DIR_GEP, f)
 
     return file_gep
