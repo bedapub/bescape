@@ -23,6 +23,10 @@ if(class(bulk)[1]=="DGEList"){
 
     print("Setting Gene Symbols as featureNames")
     featureNames(b.eset) <- b.eset@featureData@data$GeneSymbol
+} else if (class(bulk)[1]=="ExpressionSet"){
+    b.eset <- bulk
+} else {
+    return(paset("Error: input bulk dataset not an ExpressionSet or DGEList")
 }
 
 tryCatch(

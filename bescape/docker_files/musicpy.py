@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import subprocess
-from _helper_deconv import export_predictions, get_eset_gep_file, get_eset_gep_file
+from _helper_deconv import export_predictions, get_gep_eset_file, get_input_eset_file
 
 def music(gep, bulk_rna, sep='\t'):
     """R wrapper function. Uses subprocess to call shell commands form python. Calls script_music.R file
