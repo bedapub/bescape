@@ -3,6 +3,7 @@ import pandas as pd
 import subprocess
 from _helper_deconv import export_predictions, get_gep_eset_file, get_input_eset_file
 
+
 def music(gep, bulk_rna, sep='\t'):
     """R wrapper function. Uses subprocess to call shell commands form python. Calls script_music.R file
         to deconvolute. 
@@ -16,15 +17,15 @@ def music(gep, bulk_rna, sep='\t'):
         to be deconvoluted.
     """
     if not os.path.isfile(gep):
-        raise FileNotFoundError('Gene expression profile '+gep+' cannot be found.')
+        raise FileNotFoundError(
+            'Gene expression profile '+gep+' cannot be found.')
     if not os.path.isfile(bulk_rna):
-        raise FileNotFoundError('Bulk RNA file '+ bulk_rna +' cannot be found.')
-    print('Starting deconvolution using MuSiC. This process may take a few moments')
-    print('-----------------------------------------------------------------------')
+        raise FileNotFoundError(
+            'Bulk RNA file ' + bulk_rna + ' cannot be found.')
     cmd = 'Rscript /app/script_music.R ' + gep + ' ' + bulk_rna + ' temp.txt'
     p = subprocess.run([cmd], shell=True, stdout=None, stderr=None)
-    
-    out = pd.read_csv('temp.txt',sep='\t',header=0,index_col=0)
+
+    out = pd.read_csv('temp.txt', sep='\t', header=0, index_col=0)
     os.remove('temp.txt')
 
     print('Deconvolution using MuSiC finished successfully')
