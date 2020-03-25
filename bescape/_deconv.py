@@ -5,7 +5,7 @@ from shutil import copy
 
 dirname = os.path.dirname(__file__)
 
-PATH_SINGULARITY = os.path.join(dirname, './bescape_singularity.sif')
+PATH_SINGULARITY = os.path.join(dirname, '/bescape_singularity.sif')
 PATH_DOCKER = os.path.join(dirname, '')
 
 
@@ -24,7 +24,7 @@ class Bescape:
     img_dir_output = '/app/output'
     img_dir_gep = '/app/gep'
 
-    def __init__(self, service='docker', dockerhub_image='phanmir/bescape', path_singularity=PATH_SINGULARITY):
+    def __init__(self, service='docker', dockerhub_image='phanmir/bescape', path_singularity=None):
         self.service = service
         self.dockerhub_image = dockerhub_image
         self.path_singularity = path_singularity
@@ -42,9 +42,19 @@ class Bescape:
         elif self.service == 'singularity':
             try:
                 from spython.main import Client
-                Client.load(PATH_SINGULARITY)
+                self.sclient = Client
+                if path_singularity is not None:
+                    self.sclient.load(self.path_singularity)
+                    if self.sclient is None:
+                        raise FileNotFoundError("Singularity container not found. Modify path or set path_singularity to None and specify dockerhub_image to pull and build a singularity container")
+                else:
+                    dockerhub_image_uri = os.path.join('docker://', dockerhub_image)
+                    self.sclient = Client.pull(image=dockerhub_image_uri, name='bescape.sif')
+                    if self.sclient is None:
+                        raise ValueError("Could not pull the docker image. Singularity container was not created.")
+                
                 print('Singularity client loaded')
-                print('Singularity container loaded: ', PATH_SINGULARITY)
+                print('Singularity container loaded: ', self.path_singularity)
 
             except ModuleNotFoundError:
                 print('Python library for the Singularity API not installed')
@@ -143,13 +153,18 @@ class Bescape:
                     '/'), ':/', self.img_dir_output.lstrip('/'))
                 param_bind = [dir_input, dir_output, dir_gep]
                 cmd = ['python3', '/app/musicpy.py']
-                Client.execute(cmd, bind=param_bind)
+                executor = self.sclient.execute(cmd, bind=param_bind, stream=True)
+                for line in executor:
+                    print(line)
+
+                
             elif method == 'scdc':
                 dir_gep = os.path.join(dir_annot, self.img_dir_gep)
                 dir_input = os.path.join(dir_input, self.img_dir_input)
                 dir_output = os.path.join(dir_output, self.img_dir_output)
                 param_bind = [dir_input, dir_output, dir_gep]
                 cmd = ['python3', '/app/scdc.py']
-                Client.execute(cmd, bind=param_bind)
+                self.sclient.execute(cmd, bind=param_bind)
+                
         else:
             raise Exception('Selected method not supported: ', method)
