@@ -26,7 +26,7 @@ if(class(bulk)[1]=="DGEList"){
 } else if (class(bulk)[1]=="ExpressionSet"){
     b.eset <- bulk
 } else {
-    return(paset("Error: input bulk dataset not an ExpressionSet or DGEList")
+    return("Error: input bulk dataset not an ExpressionSet or DGEList")
 }
 
 tryCatch(
