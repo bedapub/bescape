@@ -17,14 +17,17 @@ class Bescape:
 
     Args:
         service (str): One of ['docker', 'singularity']. Determine which service to use
-        dockerhub_image (str): Only for Docker. Provide the url to the BESCApe deconvolution image on DockerHub.
+        docker_image (str): Only for Docker. Provide the URI to the BESCApe deconvolution image on DockerHub. It will first
+            search for a local image of same name. If not present, it will pull the image from Dockerhub. Thus, one can build
+            a local image from the Bescape source, modify it, and run it in this Bescape class.
         path_singularity (str): Only for Singularity. Provide the absolute path to the Singularity container file for BESCApe.
+            If not specified, Bescape will attempt to pull a docker image from DockerHub and build a singularity container from there.
     """
     img_dir_input = '/app/input'
     img_dir_output = '/app/output'
     img_dir_gep = '/app/gep'
 
-    def __init__(self, service='docker', dockerhub_image='phanmir/bescape', path_singularity=None):
+    def __init__(self, service='docker', docker_image='bedapub/bescape:latest', path_singularity=None):
         self.service = service
         self.dockerhub_image = dockerhub_image
         self.path_singularity = path_singularity
