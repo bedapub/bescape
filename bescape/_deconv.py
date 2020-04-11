@@ -29,16 +29,16 @@ class Bescape:
 
     def __init__(self, service='docker', docker_image='bedapub/bescape:latest', path_singularity=None):
         self.service = service
-        self.dockerhub_image = dockerhub_image
+        self.docker_image = docker_image
         self.path_singularity = path_singularity
 
         if self.service == 'docker':
             try:
                 import docker
                 self.client = docker.from_env()
-                self.client.images.pull(dockerhub_image)
+                self.client.images.pull(docker_image)
                 print('Docker client instantiated')
-                print('Docker image loaded: ', dockerhub_image)
+                print('Docker image loaded: ', docker_image)
 
             except ModuleNotFoundError:
                 print('Python library for the Docker Engine API not installed')
@@ -49,9 +49,9 @@ class Bescape:
                 if path_singularity is not None:
                     self.sclient.load(self.path_singularity)
                     if self.sclient is None:
-                        raise FileNotFoundError("Singularity container not found. Modify path or set path_singularity to None and specify dockerhub_image to pull and build a singularity container")
+                        raise FileNotFoundError("Singularity container not found. Modify path or set path_singularity to None and specify docker_image to pull and build a singularity container")
                 else:
-                    dockerhub_image_uri = os.path.join('docker://', dockerhub_image)
+                    dockerhub_image_uri = os.path.join('docker://', docker_image)
                     self.sclient = Client.pull(image=dockerhub_image_uri, name='bescape.sif')
                     if self.sclient is None:
                         raise ValueError("Could not pull the docker image. Singularity container was not created.")
@@ -134,13 +134,13 @@ class Bescape:
             if method == 'music':
 
                 c = self.client.containers.run(
-                    self.dockerhub_image, command='python3 musicpy.py', volumes=vol_dict, detach=True)
+                    self.docker_image, command='python3 musicpy.py', volumes=vol_dict, detach=True)
                 for line in c.logs(stream=True):
                     print(line.decode().strip())
 
             elif method == 'scdc':
                 c = self.client.containers.run(
-                    self.dockerhub_image, command='python3 scdcpy.py', volumes=vol_dict, detach=True)
+                    self.docker_image, command='python3 scdcpy.py', volumes=vol_dict, detach=True)
                 for line in c.logs(stream=True):
                     print(line.decode().strip())
             else:
