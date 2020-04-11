@@ -27,7 +27,8 @@ A more detailed guide available on the [BESCA tutorial page](https://bedapub.git
 ```python
 from bescape import Bescape
 
-# Initialte Bescape object with docker set as service and specifying an image to use (can be local or on DockerHub)
+# Initiate Bescape object with docker set as service and specifying an image to use
+# (can be local or on DockerHub)
 deconv = Bescape(service='docker', docker_image='phanmir/bescape:0.4')
 
 # deconvolute using MuSiC - single-cell-based basis vector
@@ -48,7 +49,7 @@ Bescape requires Docker or Singularity service to run. Links to installation ins
 * [Docker][docker]
 * [Singularity][singularity]
 
-[docker]<https://docs.docker.com/get-docker/>
-[singularity]<https://sylabs.io/guides/3.0/user-guide/installation.html>
+[docker]: https://docs.docker.com/get-docker/
+[singularity]: https://sylabs.io/guides/3.0/user-guide/installation.html
 
 ###
