@@ -13,16 +13,12 @@ Currently supported deconvolution methods:
 * [MuSiC](https://github.com/xuranw/MuSiC)
 * [SCDC](https://github.com/meichendong/SCDC/)
 
-The package requires a Singularity or Docker platfrom to run.
-
-Details on installation, example use, and integration with BESCA are documented in the following tutorial: <https://bedapub.github.io/besca/tutorials/bescape.html>
-
 ![summary fig][bescape summary]
 
 [bescape summary]: https://github.com/bedapub/bescape/blob/master/docs/fig/bescape_summary_hires.png "BESCApe summary figure"
 
 ## Example Usage
-A more detailed guide available on the [BESCA tutorial page](https://bedapub.github.io/besca/tutorials/bescape.html).
+A more detailed guide on example use and integration with [BESCA](https://github.com/bedapub/besca) are documented in the following tutorial: <https://bedapub.github.io/besca/tutorials/bescape.html>
 
 ```python
 from bescape import Bescape
