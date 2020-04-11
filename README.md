@@ -24,7 +24,7 @@ Details on installation, example use, and integration with BESCA are documented 
 ## Example Usage
 A more detailed guide available on the [BESCA tutorial page](https://bedapub.github.io/besca/tutorials/bescape.html).
 
-'''python
+```python
 from bescape import Bescape
 
 # Initialte Bescape object with docker set as service and specifying an image to use (can be local or on DockerHub)
@@ -35,14 +35,14 @@ deconv.deconvolute_sc(dir_annot='./datasets/music/gep/',
                       dir_input='./datasets/music/input',
                       dir_output='./datasets/music/output', 
                       method='music')
-'''
+```
 
 ## Installation
-Install Bescape using 'pip':
+Install Bescape using `pip`:
 
-'''sh
+```sh
 pip install bescape
-'''
+```
 
 Bescape requires Docker or Singularity service to run. Links to installation instructions:
 * [Docker][docker]
