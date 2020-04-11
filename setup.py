@@ -1,7 +1,7 @@
 from distutils.core import setup
 setup(
-  name = 'Bescape',         # How you named your package folder (MyLib)
-  packages = ['Bescape'],   # Chose the same as "name"
+  name = 'bescape',         # How you named your package folder (MyLib)
+  packages = ['bescape'],   # Chose the same as "name"
   version = '0.1',      # Start with a small number and increase it with every change you make
   license='gpl-3.0',        # Chose a license from here: https://help.github.com/articles/licensing-a-repository
   description = 'BESCA proportion estimator - BESCAPE is a cell deconvolution package. The user can specify a custom basis vector, as well as the preferred deconvolution method. Thus it allows us to detach the deconvolution algorithm from the underlying basis vector it originally comes packaged with.',   # Give a short description about your library
@@ -20,8 +20,6 @@ setup(
     'Topic :: Software Development :: Build Tools',
     'License :: OSI Approved :: GNU General Public License v3 (GPLv3),'
     'Programming Language :: Python :: 3',      #Specify which pyhton versions that you want to support
-    'Programming Language :: Python :: 3.4',
-    'Programming Language :: Python :: 3.5',
-    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
   ],
 )

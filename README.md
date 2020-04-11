@@ -18,13 +18,13 @@ Currently supported deconvolution methods:
 [bescape summary]: https://github.com/bedapub/bescape/blob/master/docs/fig/bescape_summary_hires.png "BESCApe summary figure"
 
 ## Example Usage
-A more detailed guide on example use and integration with [BESCA](https://github.com/bedapub/besca) are documented in the following tutorial: <https://bedapub.github.io/besca/tutorials/bescape.html>
+A more detailed guide on example use and integration with [BESCA](https://github.com/bedapub/besca) is available at <https://bedapub.github.io/besca/tutorials/bescape.html>
 
 ```python
 from bescape import Bescape
 
-# Initiate Bescape object with docker set as service and specifying an image to use
-# (can be local or on DockerHub)
+# Initiate Bescape object with docker set as a service and specifying an image to use
+# image can be local or on DockerHub
 deconv = Bescape(service='docker', docker_image='phanmir/bescape:0.4')
 
 # deconvolute using MuSiC - single-cell-based basis vector
