@@ -22,15 +22,20 @@ A more detailed guide on example use and integration with [BESCA](https://github
 
 ```python
 from bescape import Bescape
+import os
 
-# Initiate Bescape object with docker set as a service and specifying an image to use
-# image can be local or on DockerHub
+# docker
 deconv = Bescape(service='docker', docker_image='phanmir/bescape:0.4')
 
-# deconvolute using MuSiC - single-cell-based basis vector
-deconv.deconvolute_sc(dir_annot='./datasets/music/gep/', 
-                      dir_input='./datasets/music/input',
-                      dir_output='./datasets/music/output', 
+# Important to specify ABSOLUTE directory paths
+wd = os.getcwd()
+annot = wd + '/datasets/music/gep/'
+inpt = wd + '/datasets/music/input'
+output = wd + '/datasets/music/output'
+# deconvolute using MuSiC - sc based basis vector
+deconv.deconvolute_sc(dir_annot= annot, 
+                      dir_input= inpt,
+                      dir_output= output, 
                       method='music')
 ```
 
@@ -42,10 +47,11 @@ pip install bescape
 ```
 
 Bescape requires Docker or Singularity service to run. Links to installation instructions:
-* [Docker][docker]
+* [Docker][docker] - once installed make sure Docker is running before using the Bescape package. Either open the Docker Desktop app or run `sudo dockerd` in terminal
 * [Singularity][singularity]
 
 [docker]: https://docs.docker.com/get-docker/
 [singularity]: https://sylabs.io/guides/3.0/user-guide/installation.html
+
 
 ###
