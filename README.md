@@ -1,7 +1,7 @@
-BESCApe - BESCA proportion estimator
+BESCAPE - BESCA Proportion Estimator
 =====================================
 
-BESCApe is a cell deconvolution package. The user can specify a custom basis vector, as well as the preferred deconvolution method. Thus it allows us to detach the deconvolution algorithm from the underlying basis vector it originally comes packaged with. 
+BESCAPE is a cell deconvolution package. The user can specify a custom basis vector, as well as the preferred deconvolution method. Thus it allows us to detach the deconvolution algorithm from the underlying basis vector it originally comes packaged with. 
 
 The module distinguishes between two types of basis vectors as input:
 1. Gene Expression Profile (GEP) - generated from single-cell annotations using BESCA.export functions 
