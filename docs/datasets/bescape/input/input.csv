@@ -1,3 +1,0 @@
-dataset.name,cancer.type,platform,scale,normalization,native.probe.type,native.expr.file,hugo.expr.file,ensg.expr.file,symbol.compression.function,ensg.compression.function,symbol.to.native.mapping.file,ensg.to.native.mapping.file
-FIAS4,NA,Illumina HiSeq 4000,Linear,CPM,ENSG,FIAS4-native-gene-expr.csv,FIAS4-hugo-gene-expr.csv,FIAS4-ensg-gene-expr.csv,colMeans,colMeans,FIAS4-symbol-to-native-mapping.tsv,FIAS4-ensg-to-native-mapping.tsv
-FIAS6,NA,Affymetrix HG-U133 Plus 2.0,Log2,fRMA,Probe,FIAS6-native-gene-expr.csv,FIAS6-hugo-gene-expr.csv,FIAS6-ensg-gene-expr.csv,colMeans,colMeans,FIAS6-symbol-to-native-mapping.tsv,FIAS6-ensg-to-native-mapping.tsv
