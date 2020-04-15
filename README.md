@@ -4,7 +4,7 @@ BESCAPE - BESCA Proportion Estimator
 BESCAPE is a cell deconvolution package. The user can specify a custom basis vector, as well as the preferred deconvolution method. Thus it allows us to detach the deconvolution algorithm from the underlying basis vector it originally comes packaged with. 
 
 The module distinguishes between two types of basis vectors as input:
-1. Gene Expression Profile (GEP) - generated from single-cell annotations using BESCA.export functions 
+1. Gene Expression Profile (GEP) - generated from single-cell annotations using [BESCA.export](https://bedapub.github.io/besca/export/besca.export.generate_gep.html#besca.export.generate_gep) functions 
 2. Single-cell annotation AnnData object - should contain single-cell annotations of multiple samples from which the deconvolution method generates its own GEP
 
 Currently supported deconvolution methods:
@@ -21,8 +21,8 @@ Currently supported deconvolution methods:
 A more detailed guide on example use and integration with [BESCA](https://github.com/bedapub/besca) is available at <https://bedapub.github.io/besca/tutorials/bescape.html>
 
 ```python
-from bescape import Bescape
 import os
+from bescape import Bescape
 
 # docker
 deconv = Bescape(service='docker', docker_image='phanmir/bescape:0.4')
