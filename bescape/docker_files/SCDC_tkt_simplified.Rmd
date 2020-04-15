@@ -33,6 +33,7 @@ SCDC allows users to construct pseudo bulk samples in two ways:
 
 Here, we use the `ExpressionSet` objects after the clustering-QC of each scRNA-seq dataset. Read in the processed objects downloaded from our webpage:
 
+
 ```{r, Read SC data in}
 # ExpressionSet objects from the three different scRNA-seq resources
 #setwd("/pstore/home/kamthont/SCDC-master/data")
@@ -41,12 +42,19 @@ Here, we use the `ExpressionSet` objects after the clustering-QC of each scRNA-s
 #qc.sc3 <- readRDS(params$scfile3)
 library(tidyverse)
 library(SCDC)
+
 scdata<-NULL
-nscdata<-length(params$scfilelist)
+scfilelist<-eval(parse(text=params$scfilelist))
+nscdata<-length(scfilelist)
+
 for(index in 1:nscdata){
-scdata[[index]]<-readRDS(params$scfilelist[index])
+scdata[[index]]<-readRDS(scfilelist[index])
 }
 
+```
+
+```{r, message=FALSE}
+#message(scdata)
 ```
 
 ## SCDC on Real Bulk RNA-seq Data
@@ -56,10 +64,18 @@ To allow the basis matrix to reflect the potentially different gene expression p
 ```{r, RealBulk}
 bulk <- readRDS(params$bulkfile)
 # setting the search.length as 0.01 might take several minutes to finish the ENSEMBLE procedure.
-fadista.healthy.ens <- SCDC_ENSEMBLE(bulk.eset = bulk %>% filter(params$conditionvar == params$condition_level1), sc.eset.list = scdata, ct.varname = params$celltypevar,
-sample = params$samplevar, truep = NULL, ct.sub =  params$celltypesel, search.length = 0.01, grid.search = T)  
 
-fadista.t2d.ens <- SCDC_ENSEMBLE(bulk.eset = bulk %>% filter(params$conditionvar == params$condition_level2), sc.eset.list = scdata, ct.varname = params$celltypevar, sample = params$samplevar, truep = NULL, ct.sub =  params$celltypesel, search.length = 0.01, grid.search = T)  
+
+
+#fadista.healthy.ens <- SCDC_ENSEMBLE(bulk.eset = bulk %>% filter(params$conditionvar == params$condition_level1), sc.eset.list = list(scdata[[1]]$sc.eset.qc, scdata[[2]]$sc.eset.qc), ct.varname = params$celltypevar, sample = params$samplevar, truep = NULL, ct.sub =  params$celltypesel, search.length = 0.01, grid.search = T)  
+
+
+
+fadista_77 <- bulk
+fadista.healthy.ens <- SCDC_ENSEMBLE(bulk.eset = fadista_77[,fadista_77$hba1c_class2 == "Normal"], sc.eset.list =list( scdata[[1]]$sc.eset.qc, scdata[[2]]$sc.eset.qc), ct.varname = "cluster", sample = "sample", truep = NULL, ct.sub =  c("alpha","beta","delta","gamma","acinar","ductal"), search.length = 0.01, grid.search = T)  
+
+
+#fadista.t2d.ens <- SCDC_ENSEMBLE(bulk.eset = bulk %>% filter(params$conditionvar == params$condition_level2), sc.eset.list = scdata, ct.varname = params$celltypevar, sample = params$samplevar, truep = NULL, ct.sub =  params$celltypesel, search.length = 0.01, grid.search = T)  
 fadista.healthy.ens$w_table
 ```
 
