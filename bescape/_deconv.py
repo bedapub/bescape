@@ -66,7 +66,7 @@ class Bescape:
                 "Selected platform not supported. Chooes either Docker or Singularity")
 
     def deconvolute_gep(self,
-                        file_gep,
+                        dir_annot,
                         dir_input,
                         dir_output,
                         method='bescape'):
@@ -88,19 +88,47 @@ class Bescape:
         Returns:
             A predictions.csv files with cell type proportions
         """
+        if not os.path.exists(dir_output):
+            os.makedirs(dir_output)
+        if self.service == 'docker':
 
-        if method == 'bescape':
+            vol_dict = {dir_annot.rstrip('/'): {'bind': self.img_dir_gep, 'mode': 'ro'},
+                            dir_input.rstrip('/'): {'bind': self.img_dir_input, 'mode': 'ro'},
+                            dir_output.rstrip('/'): {'bind': self.img_dir_output, 'mode': 'rw'}}
+
+            if method == 'bescape':
+                c = self.client.containers.run(
+                    self.docker_image, command='python3 bescape.py', volumes=vol_dict, detach=True)
+                for line in c.logs(stream=True):
+                    print(line.decode().strip())
+
+            elif method == 'epic':
+                c = self.client.containers.run(
+                    self.docker_image, command='python3 epicpy.py', volumes=vol_dict, detach=True)
+                for line in c.logs(stream=True):
+                    print(line.decode().strip())
+            else:
+                raise ValueError("Selected method not supported: %s" % method)
+
+        elif self.service == 'singularity':
             with TemporaryDirectory() as tmp_gep_dir:
-                copy(file_gep, tmp_gep_dir)
-                dir_gep = os.path.join(tmp_gep_dir, self.img_dir_gep)
-                dir_input = os.path.join(dir_input, self.img_dir_input)
-                dir_output = os.path.join(dir_output, self.img_dir_output)
-                param_bind = [dir_input, dir_output, dir_gep]
-                cmd = ['python3', '/app/bescape.py']
-                Client.execute(cmd, bind=param_bind)
-        else:
-            raise Exception('Selected method not supported: ', method)
-        return None
+                if method == 'bescape':
+                    copy(file_gep, tmp_gep_dir)
+                    dir_gep = os.path.join(tmp_gep_dir.rstrip(
+                    '/'), ':/', self.img_dir_gep.lstrip('/'))
+                    dir_input = os.path.join(dir_input.rstrip(
+                        '/'), ':/', self.img_dir_input.lstrip('/'))
+                    dir_output = os.path.join(dir_output.rstrip(
+                        '/'), ':/', self.img_dir_output.lstrip('/'))
+                    param_bind = [dir_input, dir_output, dir_gep]
+                    cmd = ['python3', '/app/bescape.py']
+                    executor = self.sclient.execute(cmd, bind=param_bind, stream=True)
+                    for line in executor:
+                        print(line)
+                else:
+                    raise Exception('Selected method not supported: ', method)
+            return None
+
 
     def deconvolute_sc(self,
                        dir_annot,
