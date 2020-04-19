@@ -59,8 +59,7 @@ class Bescape:
                 print('Singularity client loaded')
                 print('Singularity container loaded: ', self.path_singularity)
 
-            except ModuleNotFoundError:
-                print('Python library for the Singularity API not installed')
+            raise ValueError('Python library for the Singularity API not installed')
         else:
             raise ValueError(
                 "Selected platform not supported. Chooes either Docker or Singularity")
@@ -103,8 +102,13 @@ class Bescape:
                     print(line.decode().strip())
 
             elif method == 'epic':
-                c = self.client.containers.run(
-                    self.docker_image, command='python3 epicpy.py', volumes=vol_dict, detach=True)
+                if dir_annot == 'epic':
+                    vol_dict.pop('epic', None)
+                    c = self.client.containers.run(
+                        self.docker_image, command='python3 epicpy_ref.py', volumes=vol_dict, detach=True)
+                else:
+                    c = self.client.containers.run(
+                        self.docker_image, command='python3 epicpy.py', volumes=vol_dict, detach=True)
                 for line in c.logs(stream=True):
                     print(line.decode().strip())
             else:
@@ -134,7 +138,8 @@ class Bescape:
                        dir_annot,
                        dir_input,
                        dir_output,
-                       method='music'):
+                       method='music',
+                       **kwargs):
         """Perform deconvolution using single cell (sc) annotations as the basis vector.
 
         User provides single cell annotations (either as scanpy AnnData obj or as eset RDS obj).
@@ -167,8 +172,11 @@ class Bescape:
                     print(line.decode().strip())
 
             elif method == 'scdc':
+                celltypevar = kwargs.celltype_var
+                celltypesel = " ".join(kwargs.celltype_sel)
+                samplevar = kwargs.sample_var
                 c = self.client.containers.run(
-                    self.docker_image, command='python3 scdcpy.py', volumes=vol_dict, detach=True)
+                    self.docker_image, command='python3 scdcpy.py --celltypevar celltypevar --samplevar samplevar --celltypesel celltypesel', volumes=vol_dict, detach=True)
                 for line in c.logs(stream=True):
                     print(line.decode().strip())
             else:
