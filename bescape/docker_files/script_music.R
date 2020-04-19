@@ -26,7 +26,7 @@ if(class(bulk)[1]=="DGEList"){
 } else if (class(bulk)[1]=="ExpressionSet"){
     b.eset <- bulk
 } else {
-    return("Error: input bulk dataset not an ExpressionSet or DGEList")
+    warning("Error: input bulk dataset not an ExpressionSet or DGEList")
 }
 
 tryCatch(
@@ -43,8 +43,4 @@ tryCatch(
         return(paste("Error:", e))
 }
 )
-
-#saveRDS(liver.frac, 'output/DGE_454_liverGEP.RDS')
-#save(liver.frac, file='output/DGE_454_liverGEP.Rdata')
-
 
