@@ -66,14 +66,14 @@ def get_gep_eset_file():
     return file_gep
 
 def get_gep_eset_multiple():
-    """Returns a list of fils in the GEP folder. Used for scdc to load single cell datasets coming from multiple studies."""
+    """Returns a string of files in the GEP folder. Used for scdc to load single cell datasets coming from multiple studies."""
     try:
         f = os.listdir(DIR_GEP)
     except FileNotFoundError:
         print('GEP directory is empty, need to provide an annotation file')
 
     f_abs = [os.path.join(DIR_GEP, sc_file) for sc_file in f]
-    out = ", ".join("'{0}'".format(i) in f_abs)
+    out = ", ".join("'{0}'".format(i) for i in f_abs)
 
     return out
         
