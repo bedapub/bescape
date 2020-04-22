@@ -30,7 +30,7 @@ RUN apt-get update && \
 RUN apt-get update && apt-get install -y libxml2 libxml2-dev libcurl4-gnutls-dev libssl-dev r-base=3.6.1-4
 
 # Run R scripts to install R packages
-RUN R -e "install.packages(c('xml2', 'roxygen2', 'rversions', 'devtools', 'tidyverse', 'BiocManager'))" && \
+RUN R -e "install.packages(c('xml2', 'roxygen2', 'rversions', 'devtools', 'tidyverse', 'BiocManager', 'nnls'))" && \
     R -e "BiocManager::install('Biobase')" && \
     R -e "devtools::install_github('xuranw/MuSiC')" && \
     R -e "devtools::install_github('meichendong/SCDC')" && \
