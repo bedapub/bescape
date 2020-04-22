@@ -4,7 +4,7 @@ import subprocess
 from _helper_deconv import export_predictions, get_gep_eset_file, get_input_eset_file
 
 
-def music(gep, bulk_rna, sep='\t'):
+def epic(bulk_rna, sep='\t'):
     """R wrapper function. Uses subprocess to call shell commands form python. Calls script_music.R file
         to deconvolute. 
 
@@ -16,9 +16,6 @@ def music(gep, bulk_rna, sep='\t'):
         bulk_rna (eset): eset expression file (R class) with bulk RNA expressions. Can be one or multiple samples
         to be deconvoluted.
     """
-    if not os.path.isfile(gep):
-        raise FileNotFoundError(
-            'Gene expression profile '+gep+' cannot be found.')
     if not os.path.isfile(bulk_rna):
         raise FileNotFoundError(
             'Bulk RNA file ' + bulk_rna + ' cannot be found.')
@@ -35,5 +32,5 @@ def music(gep, bulk_rna, sep='\t'):
 
 dir_input = get_input_eset_file()
 
-pred = music(gep=file_annot, bulk_rna=dir_input)
+pred = epic(bulk_rna=dir_input)
 export_predictions(pred_df=pred, header=True, index=True)

@@ -4,7 +4,7 @@ import subprocess
 from _helper_deconv import export_predictions, get_gep_eset_file, get_input_eset_file
 
 
-def music(gep, bulk_rna, sep='\t'):
+def epic(gep, bulk_rna, sep='\t'):
     """R wrapper function. Uses subprocess to call shell commands form python. Calls script_music.R file
         to deconvolute. 
 
@@ -36,5 +36,5 @@ def music(gep, bulk_rna, sep='\t'):
 file_annot = get_gep_eset_file()
 dir_input = get_input_eset_file()
 
-pred = music(gep=file_annot, bulk_rna=dir_input)
+pred = epic(gep=file_annot, bulk_rna=dir_input)
 export_predictions(pred_df=pred, header=True, index=True)

@@ -55,5 +55,5 @@ def scdc(gep, bulk_rna, sep='\t'):
 file_annot = get_gep_eset_multiple()
 dir_input = get_input_eset_file()
 
-pred = music(gep=file_annot, bulk_rna=dir_input)
+pred = scdc(gep=file_annot, bulk_rna=dir_input)
 export_predictions(pred_df=pred, header=True, index=True)

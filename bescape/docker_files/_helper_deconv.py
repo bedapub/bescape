@@ -47,10 +47,15 @@ def load_input_sc():
 
 def get_input_eset_file():
     """Load bulk rna file path to be deconvoluted. This is for R based methods ['music', 'scdc'] - file as eset class"""
-    f = os.listdir(DIR_INPUT)[0]
-    path_input = os.path.join(DIR_INPUT, f)
+    try:
+        f = os.listdir(DIR_INPUT)[0]
+        path_input = os.path.join(DIR_INPUT, f)
+        return path_input
+    except IndexError:
+        print('Input directory empty. Please provide an ExpressionSet file as an .RDS file')
 
-    return path_input
+
+
 
 
 def get_gep_eset_file():
@@ -58,12 +63,14 @@ def get_gep_eset_file():
        It only passes the full path of the gep eset file to the R-script. """
     try:
         f = os.listdir(DIR_GEP)[0]
+        file_gep = os.path.join(DIR_GEP, f)
+        return file_gep
     except FileNotFoundError:
         print('GEP directory is empty, need to provide an annotation file')
         
-    file_gep = os.path.join(DIR_GEP, f)
 
-    return file_gep
+
+
 
 def get_gep_eset_multiple():
     """Returns a string of files in the GEP folder. Used for scdc to load single cell datasets coming from multiple studies."""
