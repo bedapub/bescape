@@ -59,7 +59,8 @@ class Bescape:
                 print('Singularity client loaded')
                 print('Singularity container loaded: ', self.path_singularity)
 
-            raise ValueError('Python library for the Singularity API not installed')
+            except ModuleNotFoundError:
+                print('Python library for the Singularity API not installed')
         else:
             raise ValueError(
                 "Selected platform not supported. Chooes either Docker or Singularity")
