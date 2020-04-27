@@ -9,7 +9,7 @@ params:
    condition_level1: Normal
    condition_level2: T2D
    celltypevar: "cellType" #variable name containing the cell type annot in @phenoData of the eset
-   celltypesel: !r c("alpha","beta","delta","gamma","acinar","ductal") #cell types of interest to estimate, the exclam r needed to declare an R object
+   celltypesel: c("alpha","beta","delta","gamma","acinar","ductal") #cell types of interest to estimate, the exclam r needed to declare an R object
    samplevar: "sample" #variable name in @phenoData identifying the sample name
    name_temp_file: 'temp.txt'
 
@@ -72,20 +72,26 @@ print(params$celltypesel)
 Here, we move on to analyze the real pancreatic islet bulk RNA-seq dataset. Fadista et al. (2014) provided 89 bulk samples, of which 77 samples have the HbA1c level information(an important biomarker for the Type II diabetes). Hence, we focus on the deconvolution for the 77 bulk samples (51 healthy and 26 diabetic).
 To allow the basis matrix to reflect the potentially different gene expression patterns between the cases and controls, we performed the ENSEMBLE weight selection procedures for the samples from the two classes (normal and T2D) separately.
 
-```{r, RealBulk}
+```{r, RealBulk, messagage=FALSE}
 bulk <- readRDS(params$bulkfile)
 # setting the search.length as 0.01 might take several minutes to finish the ENSEMBLE procedure.
 
 celltypesel <- gsub(":", "'", params$celltypesel)
 celltypesel <- eval(parse(text=celltypesel))
 #fadista.healthy.ens <- SCDC_ENSEMBLE(bulk.eset = bulk %>% filter(params$conditionvar == params$condition_level1), sc.eset.list = scdata, ct.varname = params$celltypevar, sample = params$samplevar, truep = NULL, ct.sub =  celltypesel, search.length = 0.01, grid.search = T)  
-
+message(Initialting deconvolution. This process may take a while for larger datasets)
 fadista.healthy.ens <- SCDC_ENSEMBLE(bulk.eset = bulk, sc.eset.list = scdata, ct.varname = params$celltypevar, sample = params$samplevar, truep = NULL, ct.sub =  celltypesel, search.length = 0.01, grid.search = T)  
 
 fadista_77 <- bulk
 #fadista.healthy.ens <- SCDC_ENSEMBLE(bulk.eset = fadista_77[,fadista_77$hba1c_class2 == "Normal"], sc.eset.list = scdata, ct.varname = "cluster", sample = "sample", truep = NULL, ct.sub =  c("alpha","beta","delta","gamma","acinar","ductal"), search.length = 0.01, grid.search = T)  
 
-prop <- fadista.healthy.ens$prop.only
+getProp <- function(ens, metric = NULL){
+    out = as.data.frame(wt_prop(ens$w_table[metric, 1:2], ens$prop.only))
+    return out
+}
+
+#prop <- fadista.healthy.ens$prop.only
+prop <- getProp(fadista.healthy.ens, metric=1)
 
 name_temp_file <- params$name_temp_file
 path_temp_file <- paste('./', name_temp_file, sep='')
