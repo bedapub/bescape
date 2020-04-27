@@ -25,7 +25,7 @@ def epic(bulk_rna, sep='\t'):
     out = pd.read_csv('temp.txt', sep='\t', header=0, index_col=0)
     os.remove('temp.txt')
 
-    print('Deconvolution using MuSiC finished successfully')
+    print('Deconvolution using EPIC finished successfully')
 
     return out
 
