@@ -17,9 +17,7 @@ def scdc(gep, bulk_rna, sep='\t'):
         bulk_rna (eset): eset expression file (R class) with bulk RNA expressions. Can be one or multiple samples
         to be deconvoluted.
     """
-    if not os.path.isfile(gep):
-        raise FileNotFoundError(
-            'Gene expression profile '+gep+' cannot be found.')
+
     if not os.path.isfile(bulk_rna):
         raise FileNotFoundError(
             'Bulk RNA file ' + bulk_rna + ' cannot be found.')
@@ -32,22 +30,23 @@ def scdc(gep, bulk_rna, sep='\t'):
     celltypevar = args.celltypevar
     samplevar = args.samplevar
     celltypesel_list = args.celltypesel
-    celltypesel = ", ".join("'{0}'".format(i) for i in celltypesel_list)
+    celltypesel = ", ".join(":{0}:".format(i) for i in celltypesel_list) # result: c(:celltype_a:, :celltype_b:, ...) the colons will get replaced by single quotes (') in the R script. This silly workaround is because the python subprocess /bin/bash removes the sinle quotes.
     
     cmd = ('Rscript /app/render_scdc.R '
-           'c(' + gep +') ' 
-           bulk_rna
-           ' temp.txt '
-           celltypevar + ' '
-           'c(' + celltypesel + ') '
-           samplevar
+           "'c(" + gep +")' " 
+           + bulk_rna
+           + ' temp.txt '
+           + celltypevar + ' '
+           "'c(" + celltypesel + ")' "
+           + samplevar
     )
-    p = subprocess.run([cmd], shell=True, stdout=None, stderr=None)
+
+    p = subprocess.run([cmd], shell=True, stdout=None, stderr=None, executable='/bin/bash')
 
     out = pd.read_csv('temp.txt', sep='\t', header=0, index_col=0)
     os.remove('temp.txt')
 
-    print('Deconvolution using MuSiC finished successfully')
+    print('Deconvolution using SCDC finished successfully')
 
     return out
 
