@@ -50,7 +50,11 @@ library(tidyverse)
 library(SCDC)
 
 scdata = list(0)
-scfilelist<-eval(parse(text=params$scfilelist))
+
+scfilestring <- gsub(":", "'", params$scfilelist)
+scfilelist <- eval(parse(text=scfilestring))
+
+#scfilelist<-eval(parse(text=params$scfilelist))
 nscdata<-length(scfilelist)
 
 for(index in 1:nscdata){
@@ -72,10 +76,11 @@ To allow the basis matrix to reflect the potentially different gene expression p
 bulk <- readRDS(params$bulkfile)
 # setting the search.length as 0.01 might take several minutes to finish the ENSEMBLE procedure.
 
+celltypesel <- gsub(":", "'", params$celltypesel)
+celltypesel <- eval(parse(text=celltypesel))
+#fadista.healthy.ens <- SCDC_ENSEMBLE(bulk.eset = bulk %>% filter(params$conditionvar == params$condition_level1), sc.eset.list = scdata, ct.varname = params$celltypevar, sample = params$samplevar, truep = NULL, ct.sub =  celltypesel, search.length = 0.01, grid.search = T)  
 
-#fadista.healthy.ens <- SCDC_ENSEMBLE(bulk.eset = bulk %>% filter(params$conditionvar == params$condition_level1), sc.eset.list = scdata, ct.varname = params$celltypevar, sample = params$samplevar, truep = NULL, ct.sub =  params$celltypesel, search.length = 0.01, grid.search = T)  
-
-fadista.healthy.ens <- SCDC_ENSEMBLE(bulk.eset = bulk, sc.eset.list = scdata, ct.varname = params$celltypevar, sample = params$samplevar, truep = NULL, ct.sub =  params$celltypesel, search.length = 0.01, grid.search = T)  
+fadista.healthy.ens <- SCDC_ENSEMBLE(bulk.eset = bulk, sc.eset.list = scdata, ct.varname = params$celltypevar, sample = params$samplevar, truep = NULL, ct.sub =  celltypesel, search.length = 0.01, grid.search = T)  
 
 fadista_77 <- bulk
 #fadista.healthy.ens <- SCDC_ENSEMBLE(bulk.eset = fadista_77[,fadista_77$hba1c_class2 == "Normal"], sc.eset.list = scdata, ct.varname = "cluster", sample = "sample", truep = NULL, ct.sub =  c("alpha","beta","delta","gamma","acinar","ductal"), search.length = 0.01, grid.search = T)  

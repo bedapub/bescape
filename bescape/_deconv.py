@@ -36,12 +36,19 @@ class Bescape:
             try:
                 import docker
                 self.client = docker.from_env()
-                self.client.images.pull(docker_image)
                 print('Docker client instantiated')
-                print('Docker image loaded: ', docker_image)
+                
+                try:
+                    self.client.images.get(docker_image)
+                    print('Local Docker image found: ', docker_image)
+                except docker.errors.ImageNotFound:
+                    print('No local Docker image found. Attempting to pull from Dockerhub.')
+                    self.client.images.pull(docker_image)
+                    print('Docker image loaded: ', docker_image)
 
             except ModuleNotFoundError:
                 print('Python library for the Docker Engine API not installed')
+                    
         elif self.service == 'singularity':
             try:
                 from spython.main import Client
@@ -173,11 +180,12 @@ class Bescape:
                     print(line.decode().strip())
 
             elif method == 'scdc':
-                celltypevar = kwargs.celltype_var
-                celltypesel = " ".join(kwargs.celltype_sel)
-                samplevar = kwargs.sample_var
+                celltypevar = kwargs.get("celltype_var")
+                celltypesel = " ".join(kwargs.get("celltype_sel"))
+                samplevar = kwargs.get("sample_var")
+                cmd = 'python3 scdcpy.py --celltypevar ' +  celltypevar +  ' --samplevar ' +  samplevar + ' --celltypesel ' + celltypesel
                 c = self.client.containers.run(
-                    self.docker_image, command='python3 scdcpy.py --celltypevar celltypevar --samplevar samplevar --celltypesel celltypesel', volumes=vol_dict, detach=True)
+                    self.docker_image, command=cmd, volumes=vol_dict, detach=True)
                 for line in c.logs(stream=True):
                     print(line.decode().strip())
             else:

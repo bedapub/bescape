@@ -1,4 +1,5 @@
 import os
+import glob
 import tempfile
 import pandas as pd
 """These static variables are set up for singularity/docker - the container has a defined /app folder that is the working directory for the deconvolution module contained in it"""
@@ -8,6 +9,9 @@ DIR_GEP = "/app/gep"
 
 FILE_INPUT = "input.csv"
 FILE_OUTPUT = "predictions.csv"
+
+def listdir_nohidden(path):
+    return glob.glob(os.path.join(path, '*'))
 
 
 def load_input_batch():
@@ -80,7 +84,7 @@ def get_gep_eset_multiple():
         print('GEP directory is empty, need to provide an annotation file')
 
     f_abs = [os.path.join(DIR_GEP, sc_file) for sc_file in f]
-    out = ", ".join("'{0}'".format(i) for i in f_abs)
+    out = ", ".join(":{0}:".format(i) for i in f_abs)
 
     return out
         
