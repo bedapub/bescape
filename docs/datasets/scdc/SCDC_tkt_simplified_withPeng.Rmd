@@ -1,0 +1,93 @@
+---
+title: "SCDC: Bulk Gene Expression Deconvolution by Multiple Single-Cell RNA Sequencing References"
+output: html_document
+params:
+   scfilelist: !r #list of sc files specified at rendering
+   bulkfile: ./data/fadista_77.rds
+   hbulk: ./data/MIX3cl_scESET.rds
+   conditionvar: hba1c_class2 #variable where the main condition is of interest
+   condition_level1: Normal
+   condition_level2: T2D
+   celltypevar: "cellType" #variable name containing the cell type annot in @phenoData of the eset
+   celltypesel: !r c("pancreatic acinar cell","pancreatic ductal cell","type B pancreatic cell") #cell types of interest to estimate, the exclam r needed to declare an R object
+   samplevar: 'SubjectName' #variable name in @phenoData identifying the sample name
+   name_temp_file: 'temp.txt'
+
+vignette: >
+  %\VignetteIndexEntry{SCDC}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Data Input
+
+
+## SCDC Pre-process of scRNA-seq Data
+For each single-cell dataset with raw counts, we can first explore the demographic information by the visualization function `DemoPlot`. Here, single cells from each subject are summarized by total counts, counts per cell type, and the overall composition. This gives us a general understanding of a dataset. Take scRNA-seq data of healthy subjects from Segerstolpe et al. as an example, and we derive the following plot:
+
+## SCDC on Simulated Data
+SCDC allows users to construct pseudo bulk samples in two ways:
+
+- `generateBulk_allcells()`: Sum up gene-wise raw read counts per subject, and the true cell-type proportion is consistent with the single cell clustering result.
+
+- `generateBulk_norep()`: Randomly sample single cells from each of the cell types of interest without replacement, and then sum up raw read counts per subject. The cell-type proportions are different from single cell clustering result.
+
+Here, we use the `ExpressionSet` objects after the clustering-QC of each scRNA-seq dataset. Read in the processed objects downloaded from our webpage:
+
+
+```{r message=FALSE}
+
+message()
+```
+
+```{r Read SC data in,results="show"}
+# ExpressionSet objects from the three different scRNA-seq resources
+#setwd("/pstore/home/kamthont/SCDC-master/data")
+#qc.sc1 <- readRDS(params$scfile1)
+#qc.sc2 <- readRDS(params$scfile2)
+#qc.sc3 <- readRDS(params$scfile3)
+library(tidyverse)
+#library(SCDC)
+
+scdata = list(0)
+scfilelist<-eval(parse(text=params$scfilelist))
+nscdata<-length(scfilelist)
+
+for(index in 1:nscdata){
+scdata[[index]]<-readRDS(scfilelist[index])
+}
+
+print(params$celltypesel)
+```
+
+```{r, message=FALSE}
+library(SCDC)
+library(knitrProgressBar)
+#message(scdata)
+```
+
+## SCDC on Real Bulk RNA-seq Data
+Here, we move on to analyze the real pancreatic islet bulk RNA-seq dataset. Fadista et al. (2014) provided 89 bulk samples, of which 77 samples have the HbA1c level information(an important biomarker for the Type II diabetes). Hence, we focus on the deconvolution for the 77 bulk samples (51 healthy and 26 diabetic).
+To allow the basis matrix to reflect the potentially different gene expression patterns between the cases and controls, we performed the ENSEMBLE weight selection procedures for the samples from the two classes (normal and T2D) separately.
+
+```{r RealBulk, message=TRUE}
+bulk <- readRDS(params$bulkfile)
+# setting the search.length as 0.01 might take several minutes to finish the ENSEMBLE procedure.
+
+
+#fadista.healthy.ens <- SCDC_ENSEMBLE(bulk.eset = bulk %>% filter(params$conditionvar == params$condition_level1), sc.eset.list = scdata, ct.varname = params$celltypevar, sample = params$samplevar, truep = NULL, ct.sub =  params$celltypesel, search.length = 0.01, grid.search = T)  
+
+fadista.healthy.ens <- progress_estimated(SCDC_ENSEMBLE(bulk.eset = bulk, sc.eset.list = scdata, ct.varname = params$celltypevar, sample = params$samplevar, truep = NULL, ct.sub =  params$celltypesel, search.length = 0.01, grid.search = T))  
+
+fadista_77 <- bulk
+#fadista.healthy.ens <- SCDC_ENSEMBLE(bulk.eset = fadista_77[,fadista_77$hba1c_class2 == "Normal"], sc.eset.list = scdata, ct.varname = "cluster", sample = "sample", truep = NULL, ct.sub =  c("alpha","beta","delta","gamma","acinar","ductal"), search.length = 0.01, grid.search = T)  
+
+prop <- fadista.healthy.ens$prop.only
+
+name_temp_file <- params$name_temp_file
+path_temp_file <- paste('./', name_temp_file, sep='')
+
+write.table(prop, path_temp_file, sep="\t", col.names=NA)
+
+```
+

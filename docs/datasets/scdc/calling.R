@@ -1,0 +1,1 @@
+render('SCDC_tkt_simplified_withPeng.Rmd', params=list(scfilelist="c('./pancreatic/segerstolpe_raw_eset.RDS','./pancreatic/baron_raw_eset.RDS','./pancreatic/peng_raw_eset.RDS')", celltypevar='cluster', bulkfile='./input/fadista_77.rds', name_temp_file='All_temp.txt')
