@@ -9,7 +9,7 @@ params:
    condition_level1: Normal
    condition_level2: T2D
    celltypevar: "cellType" #variable name containing the cell type annot in @phenoData of the eset
-   celltypesel: !r c("pancreatic acinar cell","pancreatic ductal cell","type B pancreatic cell") #cell types of interest to estimate, the exclam r needed to declare an R object
+   celltypesel: !r c('pancreatic A cell','pancreatic acinar cell','pancreatic D cell','pancreatic ductal cell','type B pancreatic cell','PP cell')#cell types of interest to estimate, the exclam r needed to declare an R object
    samplevar: 'SubjectName' #variable name in @phenoData identifying the sample name
    name_temp_file: 'temp.txt'
 
@@ -79,10 +79,7 @@ bulk <- readRDS(params$bulkfile)
 
 ens <- SCDC_ENSEMBLE(bulk.eset = bulk, sc.eset.list = scdata, ct.varname = params$celltypevar, sample = params$samplevar, truep = NULL, ct.sub =  params$celltypesel, search.length = 0.01, grid.search = T)  
 
-fadista_77 <- bulk
-#fadista.healthy.ens <- SCDC_ENSEMBLE(bulk.eset = fadista_77[,fadista_77$hba1c_class2 == "Normal"], sc.eset.list = scdata, ct.varname = "cluster", sample = "sample", truep = NULL, ct.sub =  c("alpha","beta","delta","gamma","acinar","ductal"), search.length = 0.01, grid.search = T)  
-
-result_matrix <-  as.data.frame(wt_prop(ens$w_table[1, 1:3], ens$prop.only))
+result_matrix <-  as.data.frame(wt_prop(ens$w_table[1, 1:2], ens$prop.only))
 
 name_temp_file <- params$name_temp_file
 path_temp_file <- paste('./', name_temp_file, sep='')
