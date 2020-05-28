@@ -26,23 +26,30 @@ RUN apt-get update && \
     pip3 install --trusted-host pypi.python.org -r requirements.txt
 
 
-# Instal R and r-based deconvolution methods
-RUN apt-get update && apt-get install -y libxml2 libxml2-dev libcurl4-gnutls-dev libssl-dev r-base=3.6.1-4
+# Instal R and its dependiencies
+RUN apt-get update && apt-get install -y libxml2 libxml2-dev libcurl4-gnutls-dev libssl-dev r-base=3.6.1-4 pandoc
 
 # Run R scripts to install R packages
-RUN R -e "install.packages(c('xml2', 'roxygen2', 'rversions', 'devtools', 'tidyverse', 'BiocManager'))" && \
+RUN R -e "install.packages(c('xml2', 'roxygen2', 'rversions', 'devtools', 'tidyverse', 'BiocManager', 'nnls'))" && \
     R -e "BiocManager::install('Biobase')" && \
     R -e "devtools::install_github('xuranw/MuSiC')" && \
     R -e "devtools::install_github('meichendong/SCDC')" && \
     R -e "devtools::install_github('asrinivasan-oa/ganalyse')" && \
+    R -e "devtools::install_github('GfellerLab/EPIC', build_vignettes=FALSE)" && \
+    R -e "devtools::install_github('meichendong/SCDC')" && \
     R -e "install.packages('BisqueRNA')"
 
-COPY docker_files/bescape.py docker_files/_helper_deconv.py docker_files/musicpy.py docker_files/script_music.R docker_files/epic.R ./
+COPY docker_files/bescape.py docker_files/_helper_deconv.py docker_files/musicpy.py docker_files/script_music.R docker_files/epicpy.py docker_files/epicpy_ref.py docker_files/SCDC_tkt_simplified.Rmd docker_files/scdcpy.py docker_files/render_scdc.R docker_files/epic.R ./
 
 # Make script executable
-RUN chmod a+x bescape.py
-RUN chmod a+x musicpy.py
-RUN chmod a+x script_music.R
+RUN chmod a+x bescape.py && \
+    chmod a+x musicpy.py && \
+    chmod a+x script_music.R && \
+    chmod a+x epicpy.py && \
+    chmod a+x epicpy_ref.py && \
+    chmod a+x SCDC_tkt_simplified.Rmd && \
+    chmod a+x scdcpy.py && \
+    chmod a+x render_scdc.R
 
 # Make Docker container executable
 CMD ["python", "/app/bescape.py"]

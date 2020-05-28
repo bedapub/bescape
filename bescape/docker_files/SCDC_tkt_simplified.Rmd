@@ -9,8 +9,9 @@ params:
    condition_level1: Normal
    condition_level2: T2D
    celltypevar: "cellType" #variable name containing the cell type annot in @phenoData of the eset
-   celltypesel: c("alpha","beta","delta","gamma","acinar","ductal") #cell types of interest to estimate
+   celltypesel: c("alpha","beta","delta","gamma","acinar","ductal") #cell types of interest to estimate, the exclam r needed to declare an R object
    samplevar: "sample" #variable name in @phenoData identifying the sample name
+   name_temp_file: 'temp.txt'
 
 vignette: >
   %\VignetteIndexEntry{SCDC}
@@ -34,6 +35,11 @@ SCDC allows users to construct pseudo bulk samples in two ways:
 Here, we use the `ExpressionSet` objects after the clustering-QC of each scRNA-seq dataset. Read in the processed objects downloaded from our webpage:
 
 
+```{r message=FALSE}
+
+message()
+```
+
 ```{r, Read SC data in}
 # ExpressionSet objects from the three different scRNA-seq resources
 #setwd("/pstore/home/kamthont/SCDC-master/data")
@@ -43,14 +49,19 @@ Here, we use the `ExpressionSet` objects after the clustering-QC of each scRNA-s
 library(tidyverse)
 library(SCDC)
 
-scdata<-NULL
-scfilelist<-eval(parse(text=params$scfilelist))
+scdata = list(0)
+
+scfilestring <- gsub(":", "'", params$scfilelist)
+scfilelist <- eval(parse(text=scfilestring))
+
+#scfilelist<-eval(parse(text=params$scfilelist))
 nscdata<-length(scfilelist)
 
 for(index in 1:nscdata){
 scdata[[index]]<-readRDS(scfilelist[index])
 }
 
+print(params$celltypesel)
 ```
 
 ```{r, message=FALSE}
@@ -61,177 +72,20 @@ scdata[[index]]<-readRDS(scfilelist[index])
 Here, we move on to analyze the real pancreatic islet bulk RNA-seq dataset. Fadista et al. (2014) provided 89 bulk samples, of which 77 samples have the HbA1c level information(an important biomarker for the Type II diabetes). Hence, we focus on the deconvolution for the 77 bulk samples (51 healthy and 26 diabetic).
 To allow the basis matrix to reflect the potentially different gene expression patterns between the cases and controls, we performed the ENSEMBLE weight selection procedures for the samples from the two classes (normal and T2D) separately.
 
-```{r, RealBulk}
+```{r, RealBulk, messagage=FALSE}
 bulk <- readRDS(params$bulkfile)
 # setting the search.length as 0.01 might take several minutes to finish the ENSEMBLE procedure.
 
+celltypesel <- gsub(":", "'", params$celltypesel)
+celltypesel <- eval(parse(text=celltypesel))
+message('Initiating deconvolution. This process may take a while for larger datasets')
+ens <- SCDC_ENSEMBLE(bulk.eset = bulk, sc.eset.list = scdata, ct.varname = params$celltypevar, sample = params$samplevar, truep = NULL, ct.sub =  celltypesel, search.length = 0.01, grid.search = T)  
 
 
-#fadista.healthy.ens <- SCDC_ENSEMBLE(bulk.eset = bulk %>% filter(params$conditionvar == params$condition_level1), sc.eset.list = list(scdata[[1]]$sc.eset.qc, scdata[[2]]$sc.eset.qc), ct.varname = params$celltypevar, sample = params$samplevar, truep = NULL, ct.sub =  params$celltypesel, search.length = 0.01, grid.search = T)  
+prop =  as.data.frame(wt_prop(ens$w_table[1, 1:2], ens$prop.only))
+name_temp_file <- params$name_temp_file
+path_temp_file <- paste('./', name_temp_file, sep='')
+write.table(prop, path_temp_file, sep="\t", col.names=NA)
 
-
-
-fadista_77 <- bulk
-fadista.healthy.ens <- SCDC_ENSEMBLE(bulk.eset = fadista_77[,fadista_77$hba1c_class2 == "Normal"], sc.eset.list =list( scdata[[1]]$sc.eset.qc, scdata[[2]]$sc.eset.qc), ct.varname = "cluster", sample = "sample", truep = NULL, ct.sub =  c("alpha","beta","delta","gamma","acinar","ductal"), search.length = 0.01, grid.search = T)  
-
-
-#fadista.t2d.ens <- SCDC_ENSEMBLE(bulk.eset = bulk %>% filter(params$conditionvar == params$condition_level2), sc.eset.list = scdata, ct.varname = params$celltypevar, sample = params$samplevar, truep = NULL, ct.sub =  params$celltypesel, search.length = 0.01, grid.search = T)  
-fadista.healthy.ens$w_table
 ```
-
-To compare the ENSEMBLE results to the deconvolution results using one reference dataset only, we visualize the estimated proportions as following:
-```{r, Ensemble2}
-library(reshape2)
-library(ggplot2)
-getPropBox <- function(ens_h, ens_d, metric = NULL, ref, input_wt = NULL){
-  if (!is.null(input_wt)){
-    prop.h = as.data.frame(wt_prop(input_wt, ens_h$prop.only))
-    prop.d = as.data.frame(wt_prop(input_wt, ens_d$prop.only))
-  } else {
-    prop.h = as.data.frame(wt_prop(ens_h$w_table[metric,1:2], ens_h$prop.only))
-    prop.d = as.data.frame(wt_prop(ens_d$w_table[metric,1:2], ens_d$prop.only))
-  }
-  prop2 <- rbind(prop.h, prop.d)
-  prop2$condition <- c(rep("Normal", nrow(prop.h)), rep("T2D", nrow(prop.d)))
-  
-  dtmelt <- melt(prop2, id.vars = "condition")
-  dtmelt$ref <- as.factor(ref)
-  return(dtmelt)
-}
-
-fdt.ens.spearman <- getPropBox(ens_h = fadista.healthy.ens, ens_d = fadista.t2d.ens, metric = 1, ref = "ENSEMBLE+SpearmanR")
-fdt.seger <- getPropBox(ens_h = fadista.healthy.ens, ens_d = fadista.t2d.ens,  ref = "Segerstolpe", input_wt = c(0,1))
-fdt.baron <- getPropBox(ens_h = fadista.healthy.ens, ens_d = fadista.t2d.ens,  ref = "Baron", input_wt = c(1,0))
-dtall_fadista <- rbind(fdt.ens.spearman, fdt.seger, fdt.baron)
-dtall_fadista$refcond <- paste(dtall_fadista$ref, dtall_fadista$condition)
-colfunc <- colorRampPalette(c("red", "white"))
-colfunc2 <- colorRampPalette(c("blue", "white"))
-pfa2 <- ggplot(dtall_fadista[dtall_fadista$refcond %in% c("ENSEMBLE+SpearmanR Normal", "Segerstolpe Normal","Baron Normal","ENSEMBLE+SpearmanR T2D","Segerstolpe T2D","Baron T2D"),],aes(x=variable, y=value, color = factor(refcond, levels = c("ENSEMBLE+SpearmanR Normal", "Segerstolpe Normal","Baron Normal","ENSEMBLE+SpearmanR T2D","Segerstolpe T2D","Baron T2D")))) +
-  geom_boxplot(outlier.size=-1)+
-  geom_jitter(aes(x=variable,color = factor(refcond,levels = c("ENSEMBLE+SpearmanR Normal", "Segerstolpe Normal","Baron Normal","ENSEMBLE+SpearmanR T2D","Segerstolpe T2D","Baron T2D"))),
-              position = position_dodge(0.75), alpha = 0.5,cex = 0.25)+
-  theme(axis.text.x = element_text(angle = 30, hjust = 1, size=10),
-        axis.text.y = element_text(size = 10),
-        text = element_text(size = 10),
-        plot.title = element_text(size=10, face = "bold"),
-        plot.margin=unit(c(1,1,-5,0), "mm"),
-        legend.position="top",legend.title = element_blank(),
-        legend.text = element_text(size=8),
-        legend.box.spacing = unit(0, "mm"))+
-  scale_color_manual(values=c(colfunc(10)[seq(1,9,3)],colfunc2(10)[seq(1,9,3)])) +
-  ylab("") + xlab("")
-pfa2
-```
-<center>
-![Cell-type proportion estimation for 77 bulk samples from Fadista et al.](fadista_ens.png){width=600px}
-</center>
-
-In our paper, we sought to replicate previous findings on the negative correlation
-between the [hemoglobin A1c](https://www.webmd.com/diabetes/guide/glycated-hemoglobin-test-hba1c) (HbA1c, an important biomarker for type 2 diabetes)
-levels and the beta cell functions ( [Kanat et al., 2011](https://care.diabetesjournals.org/content/34/4/1006.long), [Hou et al., 2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4657079/)). 
-Hence, we constructed a linear model using the estimated cell-type proportions as the response variable and the other covariates (age, gender, BMI, and HbA1c) as predictors. Here we compare deconvolution results from three sources: 1) scRNA-seq from Segerstolpe et al. only; 2) scRNA-seq from Baron et al. only; 3) ENSEMBLE deconvolution results using scRNA-seq from Segerstolpe et al. and Baron et al. separately.
-
-
-Fit linear models: beta cell proportion ~ HbA1c + age + BMI + sex.
-```{r}
-## get demographic information of the bulk samples from Fadista et al.
-fadista_demo <- fadista_77@phenoData@data[,c("age","gender","hba1c","bmi","hba1c_class2")]
-## the following getLMpValue() function is to perform the linear regression and wrap the linear model results
-getLMpValue <- function(prop_est, method_){
-  prop_est_all <- cbind(prop_est, fadista_demo[rownames(prop_est),])
-  getlmtable <- function(ct){
-    prop_est_all$ct <- prop_est_all[,ct]
-    lm.ens1 <- lm(ct ~ hba1c + age + bmi + gender, data = prop_est_all)
-    s1 <- summary(lm.ens1)
-    sdt <- cbind(round(s1$coefficients,4), celltype = rep(ct,5))
-    return(sdt)
-  }
-  dtlm <- NULL
-  for (ct in intersect(celltypesel,
-                       colnames(prop_est))){
-    dtlm0 <- getlmtable(ct)
-    dtlm <- rbind(dtlm, dtlm0)
-  }
-  dat_text_fad <- data.frame(label = paste("p-value =",dtlm[seq(from = 2 , to = 27, by=5),c(4)]),
-                             variable = dtlm[seq(from = 2 , to = 27, by=5),c(5)],
-                             hba1c = 6, value = 0.5,
-                             condition = "T2D",
-                             method = method_)
-  demo_pval <- data.frame(label = paste("p-value =",dtlm[,c(4)]),
-                          variable = dtlm[,c(5)],
-                          value = 0.5,
-                          covar =rownames(dtlm),
-                          condition = "T2D",
-                          method = method_)
-  dtmelt <- melt(prop_est_all, id.vars = c("hba1c_class2","age","gender","bmi","hba1c"), measure.vars = c("alpha","beta","delta","gamma","acinar","ductal"))
-  dtmelt$method <- method_
-  return(list(meltdata = dtmelt, pvaldata = dat_text_fad, demo_pval = demo_pval))
-}
-res.SCDC.seger <- getLMpValue(prop_est = fadista.seger$prop.est.mvw, method_ = "SCDC+Segerstolpe")
-res.SCDC.baron <- getLMpValue(prop_est = fadista.baron$prop.est.mvw, method_ = "SCDC+Baron")
-res.SCDC.ensemble <- getLMpValue(prop_est = ens.spearman.prop, method_ = "SCDC+ENSEMBLE")
-## pool the results together for visualization:
-alldata <- rbind(res.SCDC.seger$meltdata, res.SCDC.ensemble$meltdata,
-                 res.SCDC.baron$meltdata)
-allpvalue <- rbind(res.SCDC.seger$pvaldata, res.SCDC.ensemble$pvaldata,
-                   res.SCDC.baron$pvaldata)
-demopval <- rbind(res.SCDC.seger$demo_pval, res.SCDC.ensemble$demo_pval,
-                  res.SCDC.baron$demo_pval)
-alldata$method <- as.factor(alldata$method)
-```
-
-Comparing ENSEMBLE proportion estimation results with the one-reference deconvolution results. Here we visualize the beta-cell proportions with the HbA1c levels, and present the p-values for HbA1c coefficient from each model. 
-
-```r
-fadista.LMplot <- ggplot(alldata[alldata$variable %in% c("beta"),], aes(x=hba1c, y= value)) + geom_point(aes(color = hba1c_class2)) +
-  geom_smooth(method='lm', se = FALSE, color = "black", lwd = 0.25) +
-  theme(legend.position = "top", legend.title = element_blank(), # axis.title.x = element_blank(),
-        legend.box.spacing = unit(0, "mm"),
-        text = element_text(size=9),
-        axis.text.x = element_text(size=9),
-        axis.text.y = element_text(size=9))+#, axis.title.y = element_blank()) +
-  facet_grid(cols = vars(factor(method, levels = c("SCDC+Baron", "SCDC+Segerstolpe", "SCDC+ENSEMBLE"))),scales = "free") +
-  geom_text(data = allpvalue[allpvalue$variable %in% c("beta"),],
-            mapping = aes(x=5.5, y=0.85,label = label),
-            hjust   = 0.2, vjust   = 0, size = 2.5) +
-  xlab("HbA1c") + ylab("Proportions") + ylim(c(0,1))
-fadista.LMplot
-```
-<center>
-![](fadista_LMplot.png)
-</center>
-
-We see that SCDC ENSEMBLE method derives the p-value of 0.0019 <0.05, indicating a statistically significant association between the beta-cell proportions and the HbA1c levels.
-
-## Three Cell-line Mixture Data Analysis
-In the real world, some identified cell types are hard to be distinguished in certain environment. Employing a hierachical deconvolution structure (tree-guided deconvolution structure) may work better than a straightforward deconvolution. Here, using the three-cell-line mixture sample, we show how deconvolution is performed by SCDC when only one subject is available. Also, by looking at the hierarchical structure of cell lines, we see two of the cell lines are mroe closely related. Hence, we can show how a tree-guided deconvolution step is applied in this simple case.
-
-```{r,Hierarchical,eval=FALSE}
-qc.3cl <- readRDS(params$hbulk)
-sc3cl.basis <- SCDC_basis_ONE(qc.3cl$sc.eset.qc, ct.varname = "md_cluster", sample ="orig.ident")
-df.d <- dist(t(log(sc3cl.basis$basis.mvw + 1e-10)), method = "euclidean")
-hc1 <- hclust(df.d, method = "complete")
-plot(hc1, cex = 0.8, hang = -1, main = "log(basis matrix)")
-```
-
-The tree-structured deconvolution procedure will allow users to specify a 'meta cluster' by their own professional judgment. Without the requirement for marker genes input, we could employ the function `SCDC_prop_ONE_subcl_marker()` to deconvolve the bulk samples.
-
-```{r,Hierarchical2,eval=FALSE}
-bulk3cl <- readRDS(params$hbulk)
-sc3cl2 <- qc.3cl$sc.eset.qc
-sc3cl2$md_cluster2 <- sc3cl2$md_cluster
-sc3cl2$md_cluster2[!sc3cl2$md_cluster2 %in% "NormalFibroblast"] <- "Tumor"
-# deconv_3cl <- SCDC_prop_ONE(bulk.eset = bulk3cl, sc.eset = sc3cl2, ct.varname = "md_cluster", sample = "orig.ident", ct.sub = unique(sc3cl$md_cluster), weight.basis = T)
-SCDC_3cl_tree <- SCDC_prop_ONE_subcl_marker(bulk.eset = bulk3cl, sc.eset = sc3cl2, ct.varname = "md_cluster",
-                                             sample = "orig.ident", ct.sub = unique(sc3cl2$md_cluster),
-                                             ct.fl.sub = unique(sc3cl2$md_cluster2) , weight.basis = T,
-                                             fl.varname = "md_cluster2", select.marker = T, LFC.lim = 5)
-#> WNNLS for Second level clusters MCF7 MDA-MB468 Converged at iteration  3
-SCDC_3cl_tree$prop.est
-#>        MCF7 MDA-MB468 NormalFibroblast
-#> 1 0.2561348 0.6367564        0.1071088
-```
-The choice of limit for LogFoldChange `LFC.lim=5` could be changed by users. 
-Empirically, a good threshold value would cut the number of genes to 1000~2000, which we believe is an adequate number to detect the inter-cell-type variations.
-
 
