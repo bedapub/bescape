@@ -1,0 +1,151 @@
+---
+title: "SCDC: Bulk Gene Expression Deconvolution by Multiple Single-Cell RNA Sequencing References"
+output: html_document
+params:
+   scfilelist: !r #list of sc files specified at rendering
+   bulkfile: ./data/fadista_77.rds
+   hbulk: ./data/MIX3cl_scESET.rds
+   conditionvar: hba1c_class2 #variable where the main condition is of interest
+   condition_level1: Normal
+   condition_level2: T2D
+   celltypevar: "cellType" #variable name containing the cell type annot in @phenoData of the eset
+   samplevar: 'SubjectName' #variable name in @phenoData identifying the sample name
+   name_temp_file: 'temp.txt'
+   expression_path: !r
+
+vignette: >
+  %\VignetteIndexEntry{SCDC}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Data Input
+
+
+## SCDC Pre-process of scRNA-seq Data
+For each single-cell dataset with raw counts, we can first explore the demographic information by the visualization function `DemoPlot`. Here, single cells from each subject are summarized by total counts, counts per cell type, and the overall composition. This gives us a general understanding of a dataset. Take scRNA-seq data of healthy subjects from Segerstolpe et al. as an example, and we derive the following plot:
+
+## SCDC on Simulated Data
+SCDC allows users to construct pseudo bulk samples in two ways:
+
+- `generateBulk_allcells()`: Sum up gene-wise raw read counts per subject, and the true cell-type proportion is consistent with the single cell clustering result.
+
+- `generateBulk_norep()`: Randomly sample single cells from each of the cell types of interest without replacement, and then sum up raw read counts per subject. The cell-type proportions are different from single cell clustering result.
+
+Here, we use the `ExpressionSet` objects after the clustering-QC of each scRNA-seq dataset. Read in the processed objects downloaded from our webpage:
+
+
+```{r message=FALSE}
+
+message()
+```
+
+```{r Read SC data in,results="show"}
+# ExpressionSet objects from the three different scRNA-seq resources
+#setwd("/pstore/home/kamthont/SCDC-master/data")
+#qc.sc1 <- readRDS(params$scfile1)
+#qc.sc2 <- readRDS(params$scfile2)
+#qc.sc3 <- readRDS(params$scfile3)
+library(tidyverse)
+#library(SCDC)
+
+scdata = list(0)
+scfilelist<-eval(parse(text=params$scfilelist))
+nscdata<-length(scfilelist)
+
+for(index in 1:nscdata){
+scdata[[index]]<-readRDS(scfilelist[index])
+}
+
+print(params$celltypesel)
+```
+
+```{r, message=FALSE}
+library(SCDC)
+library(knitrProgressBar)
+#message(scdata)
+```
+
+## SCDC on simulated Bulk RNA-seq Data
+Here, we move on to analyze the real pancreatic islet bulk RNA-seq dataset. Fadista et al. (2014) provided 89 bulk samples, of which 77 samples have the HbA1c level information(an important biomarker for the Type II diabetes). Hence, we focus on the deconvolution for the 77 bulk samples (51 healthy and 26 diabetic).
+To allow the basis matrix to reflect the potentially different gene expression patterns between the cases and controls, we performed the ENSEMBLE weight selection procedures for the samples from the two classes (normal and T2D) separately.
+
+
+
+```{r Read SC data in2,results="show"}
+# ExpressionSet objects from the three different scRNA-seq resources
+#setwd("/pstore/home/kamthont/SCDC-master/data")
+#qc.sc1 <- readRDS(params$scfile1)
+#qc.sc2 <- readRDS(params$scfile2)
+#qc.sc3 <- readRDS(params$scfile3)
+library(tidyverse)
+#library(SCDC)
+
+scdata = list(0)
+scfilelist<-eval(parse(text=params$scfilelist))
+nscdata<-length(scfilelist)
+
+for(index in 1:nscdata){
+scdata[[index]]<-readRDS(scfilelist[index])
+}
+
+print(params$celltypesel)
+```
+
+```{r, message=FALSE}
+library(SCDC)
+library(knitrProgressBar)
+#message(scdata)
+```
+
+## SCDC on simulated Bulk RNA-seq Data
+Here, we move on to analyze the real pancreatic islet bulk RNA-seq dataset. Fadista et al. (2014) provided 89 bulk samples, of which 77 samples have the HbA1c level information(an important biomarker for the Type II diabetes). Hence, we focus on the deconvolution for the 77 bulk samples (51 healthy and 26 diabetic).
+To allow the basis matrix to reflect the potentially different gene expression patterns between the cases and controls, we performed the ENSEMBLE weight selection procedures for the samples from the two classes (normal and T2D) separately.
+
+```{r SimBulk,  fig.width=14, fig.height=12,message=TRUE}
+truth<-read.table(file="../new/simulated_bulk/segerstolpe_pancreas/truth_segerstolpe.csv",sep=",",header=TRUE)
+celltype<-levels(truth$cell.type)
+expression_path<-params$expression_path
+ expression_matrix <- expression_path %>% 
+        readr::read_csv() %>% 
+        as.data.frame() %>%
+        tibble::column_to_rownames("Gene") %>% 
+        as.matrix()
+
+    #creating phenoData with just sample ID (TKT)
+    pData<-as.data.frame(colnames(expression_matrix))
+    colnames(pData)<-"sample"
+    metadata<-data.frame(labelDescription=c("sample"),row.names=c("sample"))
+    phenoData<-new("AnnotatedDataFrame",data=pData,varMetadata=metadata)
+    row.names(phenoData)<-colnames(expression_matrix)
+
+ bulk<-Biobase::ExpressionSet(assayData=expression_matrix,phenoData=phenoData)#no phenotype data available
+
+ 
+# setting the search.length as 0.01 might take several minutes to finish the ENSEMBLE procedure.
+
+
+#fadista.healthy.ens <- SCDC_ENSEMBLE(bulk.eset = bulk %>% filter(params$conditionvar == params$condition_level1), sc.eset.list = scdata, ct.varname = params$celltypevar, sample = params$samplevar, truep = NULL, ct.sub =  params$celltypesel, search.length = 0.01, grid.search = T)  
+
+ens <- SCDC_prop(bulk.eset = bulk, sc.eset = scdata[[1]], ct.varname = params$celltypevar, sample = params$samplevar, truep = NULL, ct.sub = celltype , search.length = 0.01, grid.search = T)  
+
+result_matrix <-  as.data.frame(ens$prop.est)
+
+result_df_wide<- result_matrix %>% 
+        as.data.frame() %>% 
+        tibble::rownames_to_column("sample.id")
+result_df_wide$sample.id<-as.factor(result_df_wide$sample.id)
+result_df <- tidyr::gather(result_df_wide,cell.type,prediction,-sample.id,factor_key= TRUE)
+
+truth$ID<-paste0(truth$sample.id,truth$cell.type)
+result_df$ID<-paste0(result_df$sample.id,result_df$cell.type)
+res<-merge(truth,result_df[,-which(colnames(result_df)=="cell.type")],by="ID")
+ggplot(res,aes(x=prediction,y=measured))+geom_point(aes(color=as.factor(cell.type)))+facet_grid(cols=vars(cell.type))#+geom_cor(method="pearson")
+
+
+name_temp_file <- params$name_temp_file
+path_temp_file <- paste('./', name_temp_file, sep='')
+
+write.table(result_matrix, path_temp_file, sep="\t", col.names=NA)
+
+```
