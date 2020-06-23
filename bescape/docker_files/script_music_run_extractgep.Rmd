@@ -1,0 +1,107 @@
+---
+title: "Music Cell Proportions and GEP extraction"
+output: html_document
+params:
+   scfilelist: !r #list of sc files specified at rendering
+   bulkfile: ./data/fadista_77.rds
+   hbulk: ./data/MIX3cl_scESET.rds
+   celltypevar: "cellType" #variable name containing the cell type annot in @phenoData of the eset
+   samplevar: 'SubjectName' #variable name in @phenoData identifying the sample name
+   name_temp_file: 'temp.txt'
+   expression_path: !r
+
+vignette: >
+  %\VignetteIndexEntry{SCDC}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, message=FALSE}
+#library(Seurat)
+suppressMessages(library(MuSiC))
+suppressMessages(library(BisqueRNA))
+#suppressMessages(library(ganalyse))
+suppressMessages(library(xbioc))
+suppressMessages(library(MCMCpack))
+suppressMessages(library(tidyverse))
+
+myArgs <- commandArgs(trailingOnly = TRUE)
+path_bulk <- params$expression_path
+name_temp_file <- params$name_temp_file
+path_temp_file <-  paste('./', name_temp_file, sep='')
+
+# prep data for deconvolution
+scdata = list(0)
+scfilelist<-eval(parse(text=params$scfilelist))
+nscdata<-length(scfilelist)
+for(index in 1:nscdata){
+scdata[[index]]<-readRDS(scfilelist[index])
+}
+
+# load bulk
+#bulk <- readRDS(file=path_bulk)
+truth<-read.table(file=path_bulk,sep=",",header=TRUE)
+celltype<-levels(truth$cell.type)
+expression_path<-params$expression_path
+ expression_matrix <- expression_path %>% 
+        readr::read_csv() %>% 
+        as.data.frame() %>%
+        tibble::column_to_rownames("Gene") %>% 
+        as.matrix()
+
+    #creating phenoData with just sample ID (TKT)
+    pData<-as.data.frame(colnames(expression_matrix))
+    colnames(pData)<-"sample"
+    metadata<-data.frame(labelDescription=c("sample"),row.names=c("sample"))
+    phenoData<-new("AnnotatedDataFrame",data=pData,varMetadata=metadata)
+    row.names(phenoData)<-colnames(expression_matrix)
+
+ bulk<-Biobase::ExpressionSet(assayData=expression_matrix,phenoData=phenoData)#no phenotype data available
+
+
+
+if(class(bulk)[1]=="DGEList"){
+    print("Converting DGEList class to eset")
+    b.eset <- ganalyse::as.eset(bulk)
+
+    print("Setting Gene Symbols as featureNames")
+    featureNames(b.eset) <- b.eset@featureData@data$GeneSymbol
+} else if (class(bulk)[1]=="ExpressionSet"){
+    b.eset <- bulk
+} else {
+    warning("Error: input bulk dataset not an ExpressionSet or DGEList")
+}
+
+tryCatch(
+{
+    print("Performing deconvolution using MuSiC")
+    # perform deconvolution
+    out.prop <- music_prop(bulk.eset = b.eset, sc.eset =scdata[[1]], clusters = 'cellType', samples='SubjectName')
+
+    # write cell fractions into temp file, which is to be loaded by the python wrapper
+    out.frac <- out.prop$Est.prop.weighted
+    write.table(out.frac, path_temp_file, sep="\t")
+},
+    error = function(e){
+        return(paste("Error:", e))
+}
+)
+truth<-read.table(file="../../docs/datasets/new/simulated_bulk/segerstolpe_pancreas/truth_segerstolpe.csv",sep=",",header=TRUE)
+```
+
+# GEP
+```{r GEP}
+library(gplots)
+celltype<-levels(truth$cell.type)
+basis = music_basis(scdata[[1]], clusters = 'cellType', samples = 'SubjectName', 
+                    select.ct = celltype)
+saveRDS(basis, file="Music_SegerBasis.RDS")
+
+heatmap.2(basis$Disgn.mtx,main="MUSIC SEGER BASIS",col=bluered(100), trace="none",scale="row",xlab="Celltypes",srtCol=45)
+heatmap.2(basis$M.theta,main="MUSIC SEGER M.theta",col=bluered(100), trace="none",scale="row",xlab="Celltypes",srtCol=45)
+heatmap.2(basis$Sigma,main="MUSIC SEGER Sigma",col=bluered(100), trace="none",scale="row",xlab="Celltypes",srtCol=45)
+
+
+
+
+```
