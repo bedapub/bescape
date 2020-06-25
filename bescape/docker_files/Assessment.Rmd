@@ -1,0 +1,138 @@
+---
+title: "GEP extraction"
+output: html_document
+params:
+   scfilelist: !r #list of sc files specified at rendering
+   bulkfile: ./data/fadista_77.rds
+   hbulk: ./data/MIX3cl_scESET.rds
+   celltypevar: "cellType" #variable name containing the cell type annot in @phenoData of the eset
+   samplevar: 'SubjectName' #variable name in @phenoData identifying the sample name
+   name_temp_file: 'temp.txt'
+   expression_path: !r
+
+vignette: >
+  %\VignetteIndexEntry{SCDC}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# GEP-Comparisons of the BESCA GEP vs. scRNASeq Reference datasets 
+## Segerstolpe
+
+```{r loadLibrary, fig.width=14, fig.height=12,message=FALSE}
+suppressMessages(library(MuSiC))
+suppressMessages(library(BisqueRNA))
+#suppressMessages(library(ganalyse))
+suppressMessages(library(xbioc))
+suppressMessages(library(MCMCpack))
+suppressMessages(library(tidyverse))
+library(gplots)
+
+#Music
+basis<-readRDS("/pstore/home/kamthont/bescape/bescape/docker_files/Music_SegerBasis.RDS")
+music_basis<-basis
+colnames(music_basis$Disgn.mtx)<-paste0("MuSiC_",colnames(music_basis$Disgn.mtx))
+music_basis<-as.data.frame(music_basis$Disgn.mtx)
+
+#SCDC
+basis<-readRDS(file="/pstore/home/kamthont/bescape/docs/datasets/scdc/SCDC_Seger_Basis.RDS")
+scdc_basis<-basis
+colnames(scdc_basis$basis)<-paste0("SCDC_",colnames(scdc_basis$basis))
+scdc_basis<-as.data.frame(scdc_basis$basis)
+
+#Besca_GEP
+besca<-read.csv("/pstore/home/kamthont/bescape/docs/datasets/new/generated_gep/segerstolpe_gep.csv",sep=",")
+colnames(besca)<-paste0("BESCA_",colnames(besca))
+
+#converting from ensembl to gene symbol
+.libPaths("/pstore/apps/bioinfo/R/3.6.1-foss")
+library(MBbiomart)
+tt<-mb_getGeneInfo(NULL,besca$NAME)
+tt<-tt[,1:2]
+ttunique<-tt[which(duplicated(tt$ensembl_gene_id)==FALSE),]
+bescamerge<-merge(besca,ttunique,by.x="BESCA_NAME",by.y="ensembl_gene_id")
+rownames(bescamerge)<-bescamerge$external_gene_name
+besca_basis<-bescamerge[,-which(colnames(bescamerge) %in% c("BESCA_NAME","external_gene_name"))]
+
+besca_basis$name<-rownames(besca_basis)
+scdc_basis$name<-rownames(scdc_basis)
+music_basis$name<-rownames(music_basis)
+merge1<-merge(music_basis,scdc_basis,by="name")
+merge_allgenes<-merge(merge1,besca_basis,by="name",all.x=TRUE)
+merge_justBESCAgenes<-merge(merge1,besca_basis,by="name")
+
+heatmap.2(as.matrix(merge1%>% dplyr::select(-name)),labRow=FALSE,main="MUSIC SCDC BASIS",col=bluered(100), trace="none",scale="row",xlab="Celltypes",srtCol=45)
+heatmap.2(as.matric(merge_allgenes %>% dplyr::select(-name)),labRow=FALSE,main="MUSIC SCDC BESCA BASIS \n All Genes",col=bluered(100), trace="none",scale="row",xlab="Celltypes",srtCol=45)
+heatmap.2(as.matrix(merge_justBESCAgenes%>% dplyr::select(-name)),labRow=FALSE,main="MUSIC SCDC BESCA BASIS \n BESCA Genes",col=bluered(100), trace="none",scale="row",xlab="Celltypes",srtCol=45)
+
+
+```
+
+# Estimates of Proportions using the different tools
+
+## Real Bulk RNASeq
+```{r realBulk,fig.width=14, fig.height=12,message=TRUE} 
+library(SCDC)
+library(ggplot2)
+fadista_77 <- readRDS("/pstore/home/kamthont/bescape/docs/datasets/scdc/pancreatic/fadista_77.rds")
+scdata = list(0)
+scfilelist<-'/pstore/home/kamthont/bescape/docs/datasets/scdc/pancreatic/segerstolpe_raw_eset.RDS'
+nscdata<-length(scfilelist)
+
+for(index in 1:nscdata){
+scdata[[index]]<-readRDS(scfilelist[index])
+}
+
+#SCDC
+# setting the search.length as 0.01 might take several minutes to finish the ENSEMBLE procedure.
+#fadista.healthy.ens <- SCDC_prop(bulk.eset = fadista_77[,fadista_77$hba1c_class2 == "Normal"], sc.eset=scdata[[1]], ct.varname = "cluster",sample = "SubjectName", truep = NULL, ct.sub = c('pancreatic A cell','pancreatic acinar cell','pancreatic D cell','pancreatic ductal cell','type B pancreatic cell','PP cell'), search.length = 0.01, grid.search = T)  
+
+#fadista.t2d.ens <- SCDC_prop(bulk.eset = fadista_77[,fadista_77$hba1c_class2 == "T2D"], sc.eset.list = sc.eset=scdata[[1]], ct.varname = "cluster",sample = "SubjectName", truep = NULL, ct.sub = c('pancreatic A cell','pancreatic acinar cell','pancreatic D cell','pancreatic ductal cell','type B pancreatic cell','PP cell'), search.length = 0.01, grid.search = T)
+
+ens <- SCDC_prop(bulk.eset = fadista_77, sc.eset = scdata[[1]], ct.varname = "cellType",sample = "SubjectName", truep = NULL, ct.sub = c('pancreatic A cell','pancreatic acinar cell','pancreatic D cell','pancreatic ductal cell','type B pancreatic cell','PP cell'), search.length = 0.01, grid.search = T)
+
+result_matrix <-  as.data.frame(ens$prop.est)
+
+result_df_wide<- result_matrix %>% 
+        as.data.frame() %>% 
+        tibble::rownames_to_column("sample.id")
+result_df_wide$sample.id<-as.factor(result_df_wide$sample.id)
+result_df <- tidyr::gather(result_df_wide,cell.type,prediction,-sample.id,factor_key= TRUE)
+
+truth$ID<-paste0(truth$sample.id,truth$cell.type)
+result_df$ID<-paste0(result_df$sample.id,result_df$cell.type)
+res<-merge(truth,result_df[,-which(colnames(result_df)=="cell.type")],by="ID")
+ggplot(res,aes(x=prediction,y=measured))+geom_point(aes(color=as.factor(cell.type)))+facet_grid(cols=vars(cell.type))+ggtitle("SCDC-Fadista Results")#+geom_cor(method="pearson")
+
+# MuSIC
+out.prop <- music_prop(bulk.eset = fadista_77, sc.eset =scdata[[1]], clusters = 'cellType', samples='SubjectName')
+# write cell fractions into temp file, which is to be loaded by the python wrapper
+out.frac <- out.prop$Est.prop.weighted
+
+
+```
+
+
+
+
+## Simulated Bulk RNASeq
+```{r SimBulk,  fig.width=14, fig.height=12,message=TRUE}
+truth<-read.table(file="../new/simulated_bulk/segerstolpe_pancreas/truth_segerstolpe.csv",sep=",",header=TRUE)
+
+
+#MuSIC
+music_simbulk_res<-read.table(file="/pstore/home/kamthont/bescape/bescape/docker_files/MUSIC_justSeger.txt")
+
+
+#SCDC
+result_df_wide<- result_matrix %>% 
+        as.data.frame() %>% 
+        tibble::rownames_to_column("sample.id")
+result_df_wide$sample.id<-as.factor(result_df_wide$sample.id)
+result_df <- tidyr::gather(result_df_wide,cell.type,prediction,-sample.id,factor_key= TRUE)
+
+truth$ID<-paste0(truth$sample.id,truth$cell.type)
+result_df$ID<-paste0(result_df$sample.id,result_df$cell.type)
+res<-merge(truth,result_df[,-which(colnames(result_df)=="cell.type")],by="ID")
+ggplot(res,aes(x=prediction,y=measured))+geom_point(aes(color=as.factor(cell.type)))+facet_grid(cols=vars(cell.type))#+geom_cor(method="pearson")
+```
