@@ -61,18 +61,23 @@ for(index in 1:nscdata){
 scdatapaper[[index]]<-readRDS(params$scpaperlist)
 }
 celltype<-levels(truth$cell.type)
-
+```
+```{r Basis, fig.width=20, fig.height=18,message=FALSE,eval=FALSE}
 basis = music_basis(scdata[[1]], clusters = 'cellType', samples = 'SubjectName',select.ct = celltype)
 saveRDS(basis, file=params$musicbasis)
 
+#SCDC
+basis<-SCDC_basis(scdata[[1]], ct.sub = celltype, ct.varname='cellType', sample='SubjectName')
+saveRDS(basis,file=params$scdcbasis)
+```
+
+```{r preAnalysis, fig.width=20, fig.height=18,message=FALSE,eval=TRUE}
 basis<-readRDS(params$musicbasis)
 music_basis<-basis
 colnames(music_basis$Disgn.mtx)<-paste0("MuSiC_",colnames(music_basis$Disgn.mtx))
 music_basis<-as.data.frame(music_basis$Disgn.mtx)
 
 #SCDC
-basis<-SCDC_basis(scdata[[1]], ct.sub = celltype, ct.varname='cellType', sample='SubjectName')
-saveRDS(basis,file=params$scdcbasis)
 basis<-readRDS(file=params$scdcbasis)
 scdc_basis<-basis
 colnames(scdc_basis$basis)<-paste0("SCDC_",colnames(scdc_basis$basis))
@@ -99,9 +104,9 @@ merge1<-merge(music_basis,scdc_basis,by="name")
 merge_allgenes<-merge(merge1,besca_basis,by="name",all.x=TRUE)
 merge_justBESCAgenes<-merge(merge1,besca_basis,by="name")
 
-heatmap.2(as.matrix(merge1%>% dplyr::select(-name)),labRow=FALSE,main="MUSIC SCDC BASIS",col=bluered(100), trace="none",scale="row",xlab="Celltypes",cexCol=0.3,srtCol=45)
-heatmap.2(as.matrix(merge_allgenes %>% dplyr::select(-name)),labRow=FALSE,main="MUSIC SCDC BESCA BASIS \n All Genes",col=bluered(100), trace="none",scale="row",xlab="Celltypes",cexCol=0.3,srtCol=45)
-heatmap.2(as.matrix(merge_justBESCAgenes%>% dplyr::select(-name)),labRow=FALSE,main="MUSIC SCDC BESCA BASIS \n BESCA Genes",col=bluered(100), trace="none",scale="row",xlab="Celltypes",cexCol=0.3,srtCol=45)
+heatmap.2(as.matrix(merge1%>% dplyr::select(-name)),labRow=FALSE,main="MUSIC SCDC BASIS",col=bluered(100), trace="none",scale="row",xlab="Celltypes",cexCol=0.4,srtCol=45)
+heatmap.2(as.matrix(merge_allgenes %>% dplyr::select(-name)),labRow=FALSE,main="MUSIC SCDC BESCA BASIS \n All Genes",col=bluered(100), trace="none",scale="row",xlab="Celltypes",cexCol=0.4,srtCol=45)
+heatmap.2(as.matrix(merge_justBESCAgenes%>% dplyr::select(-name)),labRow=FALSE,main="MUSIC SCDC BESCA BASIS \n BESCA Genes",col=bluered(100), trace="none",scale="row",xlab="Celltypes",cexCol=0.4,srtCol=45)
 
 
 ```
@@ -122,7 +127,7 @@ scdata[[index]]<-readRDS(scfilelist[index])
 }
 ```
 ### SCDC
-```{r realBulkSCDC,fig.width=14, fig.height=12,message=TRUE,eval=TRUE}
+```{r realBulkSCDC,fig.width=14, fig.height=12,message=TRUE,eval=FALSE}
 #library(reshape2)
 bulk <- readRDS(params$real)
 ens <- SCDC_prop(bulk.eset = bulk, sc.eset = scdata[[1]], ct.varname = params$celltypevar, sample = params$samplevar, truep = NULL, ct.sub = celltype , search.length = 0.01, grid.search = T)  
@@ -132,6 +137,7 @@ write.table(result_matrix,file=params$SCDCreal,row.names=TRUE,col.names=TRUE,sep
 ```
 
 ```{r realBulkSCDC2,fig.width=14, fig.height=12,message=TRUE}
+bulk <- readRDS(params$real)
 result_matrix<-read.table(file=params$SCDCreal,sep="\t",header=TRUE,row.names=1)
 result_matrix<-cbind(result_matrix,bulk@phenoData@data[match(rownames(bulk@phenoData@data),rownames(result_matrix)),])
 
@@ -142,8 +148,8 @@ result_df_long <- tidyr::gather(result_df_wide,cell.type,prediction,-c("sampleID
 
 result_df_long$sampleid<-as.character(result_df_long$sampleid)
 
-ggplot(result_df_long,aes(x=sampleid,y=prediction,fill=cell.type))+geom_bar(stat="identity",position="stack",aes(group=hba1c_class))+facet_grid(.~hba1c_class,scales="free_x")+theme(axis.text.x=element_text(angle=45))
-
+ggplot(result_df_long %>% filter(hba1c_class!="IGT"),aes(x=sampleid,y=prediction,fill=cell.type))+geom_bar(stat="identity",position="stack",aes(group=hba1c_class))+facet_wrap(.~hba1c_class,scales="free_x")+theme(axis.text.x=element_text(angle=45))+ggtitle("RealBulk-SCDC")
+ggsave("./figures/SCDC_realBulk.pdf")
 
 fadista_77<-bulk
 ctype<-c('pancreatic.A.cell',
@@ -184,7 +190,7 @@ getLMpValue <- function(prop_est, method_){
   dtmelt$method <- method_
   return(list(meltdata = dtmelt, pvaldata = dat_text_fad, demo_pval = demo_pval))
 }
-res.SCDC.ensemble <- getLMpValue(prop_est = result_matrix[,which(colnames(result_matrix) %in% ctype)] , method_ = "Baron+Segerstolpe")
+res.SCDC.ensemble <- getLMpValue(prop_est = result_matrix[,which(colnames(result_matrix) %in% ctype)] , method_ = "Segerstolpe")
 ## pool the results together for visualization:
 alldata <-res.SCDC.ensemble$meltdata
 allpvalue <- res.SCDC.ensemble$pvaldata
@@ -202,15 +208,16 @@ fadista.LMplot <- ggplot(alldata[alldata$variable %in% c("type.B.pancreatic.cell
   geom_text(data = allpvalue[allpvalue$variable %in% c("type.B.pancreatic.cell"),],
             mapping = aes(x=5.5, y=0.85,label = label),
             hjust   = 0.2, vjust   = 0, size = 2.5) +
-  xlab("HbA1c") + ylab("Proportions") + ylim(c(0,1))+ggtitle("SCDC_BaronSegerstolpe")
+  xlab("HbA1c") + ylab("Proportions") + ylim(c(0,1))+ggtitle("RealBulk SCDC Segerstolpe")
 fadista.LMplot
+ggsave("./figures/RealBulk_SCDCSegers.pdf")
 
 ```
 
 
 ### MuSIC
 
-```{r realBulkMusic,fig.width= 20, fig.height=18,message=FALSE,eval=TRUE}
+```{r realBulkMusic,fig.width= 20, fig.height=18,message=FALSE,eval=FALSE}
 out.prop <- music_prop(bulk.eset = fadista_77, sc.eset =scdata[[1]], clusters = 'cellType', samples='SubjectName',select.ct=c('pancreatic A cell','pancreatic acinar cell','pancreatic D cell','pancreatic ductal cell','type B pancreatic cell','PP cell'))
 # write cell fractions into temp file, which is to be loaded by the python wrapper
 out.frac <- out.prop$Est.prop.weighted
@@ -229,8 +236,8 @@ result_df_long <- tidyr::gather(result_df_wide,cell.type,prediction,-c("sampleID
 
 result_df_long$sampleid<-as.character(result_df_long$sampleid)
 
-ggplot(result_df_long,aes(x=sampleid,y=prediction,fill=cell.type))+geom_bar(stat="identity",position="stack",aes(group=hba1c_class))+facet_grid(.~hba1c_class,scales="free_x")+theme(axis.text.x=element_text(angle=45,size=rel(0.5)))
-
+ggplot(result_df_long %>% filter(hba1c_class!="IGT"),aes(x=sampleid,y=prediction,fill=cell.type))+geom_bar(stat="identity",position="stack",aes(group=hba1c_class))+facet_wrap(.~hba1c_class,scales="free_x")+theme(axis.text.x=element_text(angle=45,size=rel(0.35)))
+ggsave("./figures/Music_realBulk.pdf")
 
 fadista_77<-bulk
 ctype<-c('pancreatic.A.cell',
@@ -263,6 +270,7 @@ fadista.LMplot <- ggplot(alldata[alldata$variable %in% c("type.B.pancreatic.cell
             hjust   = 0.2, vjust   = 0, size = 2.5) +
   xlab("HbA1c") + ylab("Proportions") + ylim(c(0,1))+ggtitle("Music-Segerstolpe")
 fadista.LMplot
+ggsave("./figures/RealBulk_MUSICSegers.pdf")
 
 
 ```
@@ -278,7 +286,7 @@ truth$cell.type<-gsub(" ",".",truth$cell.type)
 ```
 
 ### SCDC
-```{r SimBulkSCDC,  fig.width=14, fig.height=12,message=TRUE,eval=TRUE}
+```{r SimBulkSCDC,  fig.width=14, fig.height=12,message=TRUE,eval=FALSE}
 
 expression_path<-params$expression_path
 expression_matrix <- expression_path %>% 
@@ -313,15 +321,23 @@ result_df <- tidyr::gather(result_df_wide,cell.type,prediction,-sample.id,factor
 truth$ID<-paste0(truth$sample.id,truth$cell.type)
 result_df$ID<-paste0(result_df$sample.id,result_df$cell.type)
 res<-merge(truth,result_df[,-which(colnames(result_df)=="cell.type")],by="ID")
-ggplot(res,aes(x=prediction,y=measured))+geom_point(aes(color=as.factor(cell.type)))+facet_grid(cols=vars(cell.type),scales="free")+ggtitle("SCDC on Simulated Bulk from BESCAPE GEP")#+geom_cor(method="pearson")
+ggplot(res,aes(x=prediction,y=measured))+geom_point(aes(color=as.factor(cell.type)))+facet_wrap(.~cell.type,nrow=2,scales="free")+ggtitle("SCDC on Simulated Bulk from BESCAPE GEP")#+geom_cor(method="pearson")
+ggsave("./figures/SimBulk_BESCAGEP_SCDC.pdf")
+
 corbycell<-res %>% group_by(cell.type) %>% summarize(cor(prediction,measured))
+rmsdcell<-res %>% group_by(cell.type) %>% summarize(sqrt(mean((measured-prediction)^2)))
+madcell<-res %>% group_by(cell.type) %>% summarize(mean(abs(measured-prediction)))
 DT::datatable(corbycell,caption="SCDC on BESCA GEP-Correlation by celltype")
-rm(corbycell)
+DT::datatable(rmsdcell,caption="SCDC on BESCA GEP-RMSD by celltype")
+DT::datatable(madcell,caption="SCDC on BESCA GEP-mAD by celltype")
+
+rm(corbycell,rmsdcell, madcell)
+
 ```
 
 ### MuSIC
 
-```{r SimBulkMusic,  fig.width=14, fig.height=12,message=TRUE,eval=TRUE}
+```{r SimBulkMusic,  fig.width=14, fig.height=12,message=TRUE,eval=FALSE}
 expression_path<-params$expression_path
  expression_matrix <- expression_path %>% 
         readr::read_csv() %>% 
@@ -359,15 +375,23 @@ result_df <- tidyr::gather(result_df_wide,cell.type,prediction,-sample.id,factor
 truth$ID<-paste0(truth$sample.id,truth$cell.type)
 result_df$ID<-paste0(result_df$sample.id,result_df$cell.type)
 res<-merge(truth,result_df[,-which(colnames(result_df)=="cell.type")],by="ID")
-ggplot(res,aes(x=prediction,y=measured))+geom_point(aes(color=as.factor(cell.type)))+facet_grid(cols=vars(cell.type),scales="free")+ggtitle("MuSIC Simulated Bulk from BESCAPE GEP")
+ggplot(res,aes(x=prediction,y=measured))+geom_point(aes(color=as.factor(cell.type)))+facet_wrap(.~cell.type,nrow=2,scales="free")+ggtitle("MuSIC Simulated Bulk from BESCAPE GEP")
+ggsave("./figures/SimBulk_BESCAGEP_MUSIC.pdf")
 
 corbycell<-res %>% group_by(cell.type) %>% summarize(cor(prediction,measured))
+rmsdcell<-res %>% group_by(cell.type) %>% summarize(sqrt(mean((measured-prediction)^2)))
+madcell<-res %>% group_by(cell.type) %>% summarize(mean(abs(measured-prediction)))
 DT::datatable(corbycell,caption="Music on BESCA GEP-Correlation by celltype")
-rm(corbycell)
+DT::datatable(rmsdcell,caption="Music on BESCA GEP-RMSD by celltype")
+DT::datatable(madcell,caption="Music on BESCA GEP-mAD by celltype")
+
+
+rm(corbycell,rmsdcell, madcell)
+
 ```
 
 ## Simulated BulkRNASeq using SCDC
-```{r SCDCsimbulk,fig.width=20, fig.height=18,message=FALSE,eval=TRUE}
+```{r SCDCsimbulk,fig.width=20, fig.height=18,message=FALSE,eval=FALSE}
 ## (1) using all single cells
 pseudo.seger <- generateBulk_allcells(scdata[[1]], ct.varname = "cellType", sample = "SubjectName",ct.sub=NULL)
 
@@ -406,11 +430,15 @@ result_df$ID<-paste0(result_df$sample.id,result_df$cell.type)
 res<-merge(truthp,result_df[,-which(colnames(result_df)=="cell.type")],by="ID")
 res$cell.type<-res$cluster.id
 res$measured<-res$Freq
-ggplot(res,aes(x=prediction,y=measured))+geom_point(aes(color=as.factor(cell.type)))+facet_grid(cols=vars(cell.type),scales="free")+ggtitle("SCDC Simulated Bulkd from SCDC GEP")
-
+ggplot(res,aes(x=prediction,y=measured))+geom_point(aes(color=as.factor(cell.type)))+facet_wrap(.~cell.type,scales="free",nrow=2)+ggtitle("SCDC Simulated Bulkd from SCDC GEP")
+ggsave("./figures/SimBulk_SCDCGEP_SCDC.pdf")
 corbycell<-res %>% group_by(cluster.id) %>% summarize(cor(prediction,measured))
+rmsdcell<-res %>% group_by(cluster.id) %>% summarize(sqrt(mean((measured-prediction)^2)))
+madcell<-res %>% group_by(cluster.id) %>% summarize(mean(abs(measured-prediction)))
 DT::datatable(corbycell,caption="SCDC on SCDC GEP-Correlation by celltype")
-rm(corbycell)
+DT::datatable(rmsdcell,caption="SCDC on SCDC GEP-RMSD by celltype")
+DT::datatable(madcell,caption="SCDC on SCDC GEP-mAD by celltype")
+rm(corbycell,rmsdcell, madcell)
 
 ```
 
