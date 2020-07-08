@@ -4,3 +4,20 @@ render('script_music_run_extractgep.Rmd', params=list(scfilelist="c('../../docs/
 
 #Seger simulated using just seger based on SCDC
 render('~/bescape/docs/datasets/scdc/SCDC_tkt_simplified_SimBulk_justSeger_gepextract.Rmd', params=list(scfilelist="c('./pancreatic/segerstolpe_raw_eset.RDS')", celltypevar='cluster', expression_path="../new/simulated_bulk/segerstolpe_pancreas/simulated_blk_segerstolpe_hugo.csv",name_temp_file='Just_Seger_SimBulk.txt'))
+
+
+#Seger simulated using just seger based on SCDC
+render('/pstore/home/kamthont/bescape/bescape/docker_files/Assessment_all_exprs_sum_params.Rmd',
+       params=list(scfilelist="/pstore/home/kamthont/bescape/docs/datasets/citeseq/kotliarov_raw_exp_eset.RDS",
+                   expression_path="/pstore/home/kamthont/bescape/docs/datasets/citeseq/simulated_blk_kotliarov_hugo.csv",
+                   name_temp_file='kotliarov_SimBulk.txt',
+                   truth="/pstore/home/kamthont/bescape/docs/datasets/citeseq/truth_kotliarov_hugo.csv",
+                   musicbasis="/pstore/home/kamthont/bescape/docs/datasets/music/Music_KotliarovBasis_exp_sum.RDS",
+                   scdcbasis="/pstore/home/kamthont/bescape/docs/datasets/scdc/SCDC_KotliarovBasis_exp_sum.RDS",
+                   bescabasis="/pstore/home/kamthont/bescape/docs/datasets/citeseq/kotliarov_gep_sum_hugo.csv",
+                   real= "/pstore/home/kamthont/bescape/docs/datasets/scdc/pancreatic/fadista_77.rds",
+                   SCDCreal= "/pstore/home/kamthont/bescape/docs/datasets/scdc/SCDC_Kotliarov_real_exp_sum.txt",
+                   MUSICreal= "/pstore/home/kamthont/bescape/docs/datasets/music/Music_Kotliarov_real_exp_sum.txt",
+                   SCDCsim= "/pstore/home/kamthont/bescape/docs/datasets/scdc/SCDC_Kotliarov_sim_exp_sum.txt",
+                   MUSICsim= "/pstore/home/kamthont/bescape/docs/datasets/music/MUSIC_Kotliarov_sim_exp_sum.txt"),
+       output_file="Assessment_all_exprs_sum_kotliarov.html")
