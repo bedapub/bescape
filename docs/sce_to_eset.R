@@ -37,5 +37,5 @@ seurat_to_eset <- function(seurat, delim='-', idx=2, filename='seurat.RDS'){
 }
 
 
-seurat <- sce_to_seurat(sce_path='./segerstolpe_raw_sce.RDS', sc_anno_path='./segerstolpe_annot.csv', filename=NULL)
-eset <- seurat_to_eset(seurat, delim='_', idx=2, filename='./segerstolpe_raw_eset.RDS')
+seurat <- sce_to_seurat(sce_path='./manuscript_data/peng_raw_exp_sce.RDS', sc_anno_path='./manuscript_data/peng_annot.csv', filename=NULL)
+eset <- seurat_to_eset(seurat, delim='_', idx=1, filename='./manuscript_data/peng_raw_exp_eset.RDS')
