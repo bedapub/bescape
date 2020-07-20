@@ -165,6 +165,13 @@ scdata[[index]]<-readRDS(scfilelist[index])
 bulk <- readRDS(params$real)
 ens <- SCDC_prop(bulk.eset = bulk, sc.eset = scdata[[1]], ct.varname = params$celltypevar, sample = params$samplevar, truep = NULL, ct.sub = celltype , search.length = 0.01, grid.search = T)  
 
+if(length(scdata)>1) {
+ens <- SCDC_ENSEMBLE(bulk.eset = bulk, sc.eset.list = scdata, ct.varname = params$celltypevar, sample = params$samplevar, truep = NULL, ct.sub =  celltype, search.length = 0.01, grid.search = T)  
+prop =  as.data.frame(wt_prop(ens$w_table[1, 1:2], ens$prop.only))
+ens$prop.est<-prop
+}
+
+
 result_matrix <-  as.data.frame(ens$prop.est)
 write.table(result_matrix,file=params$SCDCreal,row.names=TRUE,col.names=TRUE,sep="\t",quote=FALSE)
 ```
