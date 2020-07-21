@@ -52,4 +52,4 @@ RUN chmod a+x bescape.py && \
     chmod a+x scdc_input.R
 
 # Make Docker container executable
-CMD ["python", "/app/bescape.py"]
+CMD ["python", "/app/musicpy.py"]
