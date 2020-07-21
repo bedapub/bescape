@@ -77,4 +77,4 @@ readr::write_csv(combined_result_df, path_output)
     
 ## export basis vector
 basis = music_basis(gep.eset, clusters = 'cellType', samples = 'SubjectName')
-saveRDS(basis, file=paste0(myArgs[3],'/music_basis.RDS')
+saveRDS(basis, file=paste0(myArgs[3],'/music_basis.RDS'))
