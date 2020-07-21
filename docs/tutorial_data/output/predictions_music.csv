@@ -1,0 +1,111 @@
+sample.id,cell.type,prediction,dataset.name
+S0,pancreatic A cell,0.004057807338379159,segerstolpe
+S1,pancreatic A cell,0.04203716923349808,segerstolpe
+S2,pancreatic A cell,0.051229736526681835,segerstolpe
+S3,pancreatic A cell,0.16911152812331198,segerstolpe
+S4,pancreatic A cell,0.1314729848676883,segerstolpe
+S5,pancreatic A cell,0.11691111485161859,segerstolpe
+S6,pancreatic A cell,0.13399310177550974,segerstolpe
+S7,pancreatic A cell,0.07035988624577973,segerstolpe
+S8,pancreatic A cell,0.007865577447294124,segerstolpe
+S9,pancreatic A cell,0.13952787318934404,segerstolpe
+S0,PP cell,0.18940880313890757,segerstolpe
+S1,PP cell,0.0917883666913121,segerstolpe
+S2,PP cell,0.12019194100322735,segerstolpe
+S3,PP cell,0.17287705090403732,segerstolpe
+S4,PP cell,0.12298202775855487,segerstolpe
+S5,PP cell,0.057127239386857924,segerstolpe
+S6,PP cell,0.09425065092826088,segerstolpe
+S7,PP cell,0.1034181351709148,segerstolpe
+S8,PP cell,0.20598288698968706,segerstolpe
+S9,PP cell,0.00944359897136301,segerstolpe
+S0,enteroendocrine cell,0.0460129167443312,segerstolpe
+S1,enteroendocrine cell,0.11886406930721631,segerstolpe
+S2,enteroendocrine cell,0.02008742382398921,segerstolpe
+S3,enteroendocrine cell,0.13217317246532015,segerstolpe
+S4,enteroendocrine cell,0.12780606725853025,segerstolpe
+S5,enteroendocrine cell,0.1697781214692341,segerstolpe
+S6,enteroendocrine cell,0.027092075893600097,segerstolpe
+S7,enteroendocrine cell,0.116359761094785,segerstolpe
+S8,enteroendocrine cell,0.09193599650896184,segerstolpe
+S9,enteroendocrine cell,0.21896928137214733,segerstolpe
+S0,pancreatic ductal cell,0,segerstolpe
+S1,pancreatic ductal cell,0.10704681251321978,segerstolpe
+S2,pancreatic ductal cell,0.17299520584583447,segerstolpe
+S3,pancreatic ductal cell,0.15357939939212042,segerstolpe
+S4,pancreatic ductal cell,0.12485545907265354,segerstolpe
+S5,pancreatic ductal cell,0.11001263399502899,segerstolpe
+S6,pancreatic ductal cell,0.05404828780725261,segerstolpe
+S7,pancreatic ductal cell,0.09169219414263777,segerstolpe
+S8,pancreatic ductal cell,0.05896570640414036,segerstolpe
+S9,pancreatic ductal cell,0.1721279613447204,segerstolpe
+S0,type B pancreatic cell,0.05471073294848594,segerstolpe
+S1,type B pancreatic cell,0.15869617495346347,segerstolpe
+S2,type B pancreatic cell,0.13058740327822022,segerstolpe
+S3,type B pancreatic cell,0.042299952397878794,segerstolpe
+S4,type B pancreatic cell,0.12180601130022001,segerstolpe
+S5,type B pancreatic cell,0.021837993469578078,segerstolpe
+S6,type B pancreatic cell,0.05424017155485706,segerstolpe
+S7,type B pancreatic cell,0.11582816704235216,segerstolpe
+S8,type B pancreatic cell,0.14909607036009256,segerstolpe
+S9,type B pancreatic cell,0.02559497719167651,segerstolpe
+S0,pancreatic D cell,0.03332145964697364,segerstolpe
+S1,pancreatic D cell,0.06243960339791091,segerstolpe
+S2,pancreatic D cell,0.1990373631285582,segerstolpe
+S3,pancreatic D cell,0.06989800134806395,segerstolpe
+S4,pancreatic D cell,0.06476033056690428,segerstolpe
+S5,pancreatic D cell,0.20479937982106866,segerstolpe
+S6,pancreatic D cell,0.12575534612172556,segerstolpe
+S7,pancreatic D cell,0.11717566364044292,segerstolpe
+S8,pancreatic D cell,0.11877895561740363,segerstolpe
+S9,pancreatic D cell,0.22474776437104305,segerstolpe
+S0,pancreatic acinar cell,0.19642801185211545,segerstolpe
+S1,pancreatic acinar cell,0.1401908151589983,segerstolpe
+S2,pancreatic acinar cell,0.08519234634996434,segerstolpe
+S3,pancreatic acinar cell,0.006902166216853411,segerstolpe
+S4,pancreatic acinar cell,0.14030181952320292,segerstolpe
+S5,pancreatic acinar cell,0.15046494555294718,segerstolpe
+S6,pancreatic acinar cell,0.12350109518162729,segerstolpe
+S7,pancreatic acinar cell,0.09451902797864942,segerstolpe
+S8,pancreatic acinar cell,0.1328564682058128,segerstolpe
+S9,pancreatic acinar cell,0.06794611238021414,segerstolpe
+S0,fibroblast,0.26236960575364265,segerstolpe
+S1,fibroblast,0.03983258328581794,segerstolpe
+S2,fibroblast,0.06991952680510419,segerstolpe
+S3,fibroblast,0.10777364550157267,segerstolpe
+S4,fibroblast,0.05048395297802541,segerstolpe
+S5,fibroblast,0.06398397706412604,segerstolpe
+S6,fibroblast,0.08666884221207077,segerstolpe
+S7,fibroblast,0.12112025556263147,segerstolpe
+S8,fibroblast,0.022299008315509947,segerstolpe
+S9,fibroblast,0.09610214468191677,segerstolpe
+S0,blood vessel endothelial cell,0.02192840701669899,segerstolpe
+S1,blood vessel endothelial cell,0.10607079626291731,segerstolpe
+S2,blood vessel endothelial cell,0.09592697164424618,segerstolpe
+S3,blood vessel endothelial cell,0.09882211418128431,segerstolpe
+S4,blood vessel endothelial cell,0.11321528649278968,segerstolpe
+S5,blood vessel endothelial cell,0.06804832396056407,segerstolpe
+S6,blood vessel endothelial cell,0.1454801526003822,segerstolpe
+S7,blood vessel endothelial cell,0.0959826233832247,segerstolpe
+S8,blood vessel endothelial cell,0.06877033300472685,segerstolpe
+S9,blood vessel endothelial cell,0.008250683643889176,segerstolpe
+S0,macrophage,0.1917622555604653,segerstolpe
+S1,macrophage,0.1330336091956458,segerstolpe
+S2,macrophage,0.054832081594173986,segerstolpe
+S3,macrophage,0.04656296946955702,segerstolpe
+S4,macrophage,0.002316060181430692,segerstolpe
+S5,macrophage,0.037036270428976385,segerstolpe
+S6,macrophage,0.1549702759247137,segerstolpe
+S7,macrophage,0.073544285738582,segerstolpe
+S8,macrophage,0.1434489971463708,segerstolpe
+S9,macrophage,0.037289602853685606,segerstolpe
+S0,V11,1,segerstolpe
+S1,V11,2,segerstolpe
+S2,V11,3,segerstolpe
+S3,V11,4,segerstolpe
+S4,V11,5,segerstolpe
+S5,V11,6,segerstolpe
+S6,V11,7,segerstolpe
+S7,V11,8,segerstolpe
+S8,V11,9,segerstolpe
+S9,V11,10,segerstolpe
