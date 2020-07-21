@@ -72,75 +72,6 @@ class Bescape:
             raise ValueError(
                 "Selected platform not supported. Chooes either Docker or Singularity")
 
-    def deconvolute_gep(self,
-                        dir_annot,
-                        dir_input,
-                        dir_output,
-                        method='bescape'):
-        """Perform deconvolution using a Gene expression profile as the basis vector
-
-        Calls a Singularity/Docker container which contains the required Python and R dependencies
-        for all supported deconvolution methods.
-
-        Args:
-            file_gep (.csv): path to the gene expression profile .csv file. First column has to be
-                ENSEMBL gene names, first row are cell type labels. Gene expression should be linear,
-                not log-transformed.
-            dir_input (String): absolute path to the directory  containing the input.csv file.
-                The correct format of input.csv is described in the tutorial.
-            dir__output (String): absolute path for desired output directory
-            method (String): desired method to be used for deconvolution.
-                Current options: ['bescape', 'epic', 'music', 'scdc']
-
-        Returns:
-            A predictions.csv files with cell type proportions
-        """
-        if not os.path.exists(dir_output):
-            os.makedirs(dir_output)
-        if self.service == 'docker':
-
-            vol_dict = {dir_annot.rstrip('/'): {'bind': self.img_dir_gep, 'mode': 'ro'},
-                            dir_input.rstrip('/'): {'bind': self.img_dir_input, 'mode': 'ro'},
-                            dir_output.rstrip('/'): {'bind': self.img_dir_output, 'mode': 'rw'}}
-
-            if method == 'bescape':
-                c = self.client.containers.run(
-                    self.docker_image, command='python3 bescape.py', volumes=vol_dict, detach=True)
-                for line in c.logs(stream=True):
-                    print(line.decode().strip())
-
-            elif method == 'epic':
-                if dir_annot == 'epic':
-                    vol_dict.pop('epic', None)
-                    c = self.client.containers.run(
-                        self.docker_image, command='python3 epicpy_ref.py', volumes=vol_dict, detach=True)
-                else:
-                    c = self.client.containers.run(
-                        self.docker_image, command='python3 epicpy.py', volumes=vol_dict, detach=True)
-                for line in c.logs(stream=True):
-                    print(line.decode().strip())
-            else:
-                raise ValueError("Selected method not supported: %s" % method)
-
-        elif self.service == 'singularity':
-            with TemporaryDirectory() as tmp_gep_dir:
-                if method == 'bescape':
-                    copy(file_gep, tmp_gep_dir)
-                    dir_gep = os.path.join(tmp_gep_dir.rstrip(
-                    '/'), ':/', self.img_dir_gep.lstrip('/'))
-                    dir_input = os.path.join(dir_input.rstrip(
-                        '/'), ':/', self.img_dir_input.lstrip('/'))
-                    dir_output = os.path.join(dir_output.rstrip(
-                        '/'), ':/', self.img_dir_output.lstrip('/'))
-                    param_bind = [dir_input, dir_output, dir_gep]
-                    cmd = ['python3', '/app/bescape.py']
-                    executor = self.sclient.execute(cmd, bind=param_bind, stream=True)
-                    for line in executor:
-                        print(line)
-                else:
-                    raise Exception('Selected method not supported: ', method)
-            return None
-
 
     def deconvolute_sc(self,
                        dir_annot,
@@ -180,9 +111,10 @@ class Bescape:
                     print(line.decode().strip())
 
             elif method == 'scdc':
-                celltypevar = kwargs.get("celltype_var")
-                celltypesel = " ".join(kwargs.get("celltype_sel"))
-                samplevar = kwargs.get("sample_var")
+                celltypevar = 'cluster' #kwargs.get("celltype_var")
+                celltypesel = kwargs.get("celltype_sel")
+                celltypesel = ["^".join(i.split()) for i in celltypesel]
+                samplevar = 'SubjectName' #kwargs.get("sample_var")
                 cmd = 'python3 scdcpy.py --celltypevar ' +  celltypevar +  ' --samplevar ' +  samplevar + ' --celltypesel ' + celltypesel
                 c = self.client.containers.run(
                     self.docker_image, command=cmd, volumes=vol_dict, detach=True)

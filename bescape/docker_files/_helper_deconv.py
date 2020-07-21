@@ -98,3 +98,8 @@ def export_predictions(pred_df, filename=FILE_OUTPUT, header=True, index=False):
 def get_dir_input():
     """Returns the static input directory path inside the Docker/Singularity container"""
     return DIR_INPUT
+
+def get_dir_output():
+    """Returns the static output directory path inside the Docker/Singularity container"""
+    return DIR_OUTPUT
+
