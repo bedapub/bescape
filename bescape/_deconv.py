@@ -114,6 +114,7 @@ class Bescape:
                 celltypevar = 'cluster' #kwargs.get("celltype_var")
                 celltypesel = kwargs.get("celltype_sel")
                 celltypesel = ["^".join(i.split()) for i in celltypesel]
+                celltypesel = " ".join(celltypesel)
                 samplevar = 'SubjectName' #kwargs.get("sample_var")
                 cmd = 'python3 scdcpy.py --celltypevar ' +  celltypevar +  ' --samplevar ' +  samplevar + ' --celltypesel ' + celltypesel
                 c = self.client.containers.run(
@@ -143,7 +144,12 @@ class Bescape:
                 dir_input = os.path.join(dir_input, self.img_dir_input)
                 dir_output = os.path.join(dir_output, self.img_dir_output)
                 param_bind = [dir_input, dir_output, dir_gep]
-                cmd = ['python3', '/app/scdc.py']
+                celltypevar = 'cluster' #kwargs.get("celltype_var")
+                celltypesel = kwargs.get("celltype_sel")
+                celltypesel = ["^".join(i.split()) for i in celltypesel]
+                celltypesel = " ".join(celltypesel)
+                samplevar = 'SubjectName' #kwargs.get("sample_var")
+                cmd = ['python3', 'scdcpy.py' ,'--celltypevar ' +  celltypevar,  '--samplevar ' +  samplevar,'--celltypesel ' + celltypesel]
                 self.sclient.execute(cmd, bind=param_bind)
                 
         else:
