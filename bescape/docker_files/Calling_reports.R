@@ -1,0 +1,39 @@
+#This script calls upon the rmarkdown scripts to generate the reports
+library(rmarkdown)
+#kotliarov
+render('./bescape/docker_files/Assessment_all_exprs_sum_params.Rmd',
+       params=list(scfilelist="../../docs/datasets/citeseq/kotliarov_raw_exp_eset.RDS",
+                   celltypevar= "cellType",
+                   samplevar= "SubjectName",
+                   expression_path="../../docs/datasets/citeseq/simulated_blk_kotliarov_hugo.csv",
+                   name_temp_file='kotliarov_SimBulk.txt',
+                   truth="../../docs/datasets/citeseq/truth_kotliarov_hugo.csv",
+                   musicbasis="../../docs/datasets/music/Music_KotliarovBasis_exp_sum.RDS",
+                   scdcbasis="../../docs/datasets/scdc/SCDC_KotliarovBasis_exp_sum.RDS",
+                   bescabasis="../../docs/datasets/citeseq/kotliarov_gep_sum_hugo.csv",
+                   SCDCreal= "../../docs/datasets/scdc/SCDC_Kotliarov_real_exp_sum.txt",
+                   MUSICreal= "../../docs/datasets/music/Music_Kotliarov_real_exp_sum.txt",
+                   SCDCsim= "../../docs/datasets/scdc/SCDC_Kotliarov_sim_exp_sum.txt",
+                   MUSICsim= "../../docs/datasets/music/MUSIC_Kotliarov_sim_exp_sum.txt",
+                   studyname= "Citeseq"),
+       output_file="Assessment_all_exprs_sum_kotliarov_res.html")
+
+#Segerstolpe
+render('./bescape/docker_files/Assessment_all_exprs_sum_params.Rmd',
+       params=list(scfilelist= "../../docs/datasets/expcp10k_sum/segerstolpe_raw_exp_eset.RDS",
+                   celltypevar= "cellType",
+                   samplevar= "SubjectName",
+                   truth= "../../docs/datasets/expcp10k_sum/truth/truth_segerstolpe_sum.csv",
+                   musicbasis= "../../docs/datasets/music/Music_SegerBasis_exp_sum.RDS",
+                   scdcbasis=  "../../docs/datasets/scdc/SCDC_Seger_Basis_exp_sum.RDS",
+                   bescabasis= "../../docs/datasets/expcp10k_sum/segerstolpe_gep_sum.csv",
+                   real= "../../docs/datasets/scdc/pancreatic/fadista_77.rds",
+                   SCDCreal= "../../docs/datasets/scdc/SCDC_Seger_real_exp_sum.txt",
+                   MUSICreal= "../../docs/datasets/music/Music_Seger_real_exp_sum.txt",
+                   expression_path= "../../docs/datasets/expcp10k_sum/simulated/simulated_bulk_segerstolpe_sum.csv",
+                   SCDCsim= "../../docs/datasets/scdc/SCDC_Seger_sim_exp_sum.txt",
+                   MUSICsim= "../../docs/datasets/music/MUSIC_Seger_sim_exp_sum.txt",
+                   fulleval= FALSE,
+                   bescaname= "ENS",
+                   studyname= "Segers",
+                   fullevalreal=TRUE), output_file="Assessment_all_exprs_sum_segers_res.html")
