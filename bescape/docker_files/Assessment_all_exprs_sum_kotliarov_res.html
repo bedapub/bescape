@@ -5405,8 +5405,6 @@ div.tocify {
 
 <div id="gep-comparisons-of-the-besca-gep-vs.scrnaseq-reference-datasets" class="section level1">
 <h1>GEP-Comparisons of the BESCA GEP vs. scRNASeq Reference datasets</h1>
-<div id="segerstolpe" class="section level2">
-<h2>Segerstolpe</h2>
 <pre class="r"><code>#.libPaths(c(&quot;~/R/x86_64-pc-linux-gnu-library/3.6&quot;,.libPaths()))
 suppressMessages(library(MuSiC))
 suppressMessages(library(BisqueRNA))
@@ -5422,10 +5420,8 @@ dpispec&lt;-600
 figwspec&lt;-8.5
 fighspec&lt;-17.5
 
-test&lt;-params$truth
-print(getwd())</code></pre>
-<pre><code>## [1] &quot;/pstore/home/kamthont/bescape/bescape/docker_files&quot;</code></pre>
-<pre class="r"><code>truth&lt;-read.table(file=params$truth,sep=&quot;,&quot;,header=TRUE)
+
+truth&lt;-read.table(file=params$truth,sep=&quot;,&quot;,header=TRUE)
 scdata = list(0)
 scfilelist&lt;-params$scfilelist
 nscdata&lt;-length(scfilelist)
@@ -5505,7 +5501,6 @@ heatmap.2(as.matrix(besca_basis%&gt;% dplyr::select(-name)),labRow=FALSE,main=&q
 #pdf(paste0(&quot;./figures/&quot;,params$studyname,&quot;Mergedbases_subset.pdf&quot;))
 #heatmap.2(as.matrix(merge_justBESCAgenes%&gt;% dplyr::select(-name)),labRow=FALSE,main=&quot;MUSIC SCDC BESCA GEPs \n BESCA Genes&quot;,col=bluered(100), trace=&quot;none&quot;,scale=&quot;row&quot;,xlab=&quot;Celltypes&quot;,cexCol=0.4,srtCol=45,key.par=list(cex=0.5))
 #dev.off()</code></pre>
-</div>
 </div>
 <div id="estimates-of-proportions-using-the-different-tools" class="section level1">
 <h1>Estimates of Proportions using the different tools</h1>
@@ -5686,9 +5681,22 @@ expression_matrix &lt;- expression_path %&gt;%
         readr::read_csv() %&gt;% 
         as.data.frame() %&gt;%
         tibble::column_to_rownames(&quot;Gene&quot;) %&gt;% 
-        as.matrix()
-
-#creating phenoData with just sample ID (TKT)
+        as.matrix()</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   Gene = col_character(),
+##   S0 = col_double(),
+##   S1 = col_double(),
+##   S2 = col_double(),
+##   S3 = col_double(),
+##   S4 = col_double(),
+##   S5 = col_double(),
+##   S6 = col_double(),
+##   S7 = col_double(),
+##   S8 = col_double(),
+##   S9 = col_double()
+## )</code></pre>
+<pre class="r"><code>#creating phenoData with just sample ID (TKT)
 pData&lt;-as.data.frame(colnames(expression_matrix))
 colnames(pData)&lt;-&quot;sample&quot;
 metadata&lt;-data.frame(labelDescription=c(&quot;sample&quot;),row.names=c(&quot;sample&quot;))
@@ -5701,8 +5709,31 @@ rownames(bulk)&lt;-ttunique$external_gene_name[match(rownames(bulk),ttunique$ens
 }
 
 
-ens &lt;- SCDC_prop(bulk.eset = bulk, sc.eset = scdata[[1]], ct.varname = params$celltypevar, sample = params$samplevar, truep = NULL, ct.sub = celltype , search.length = 0.01, grid.search = T)  
-result_matrix &lt;-  as.data.frame(ens$prop.est)
+ens &lt;- SCDC_prop(bulk.eset = bulk, sc.eset = scdata[[1]], ct.varname = params$celltypevar, sample = params$samplevar, truep = NULL, ct.sub = celltype , search.length = 0.01, grid.search = T)  </code></pre>
+<pre><code>## Creating Basis Matrix adjusted for maximal variance weight</code></pre>
+<pre><code>## Used 1184 common genes...</code></pre>
+<pre><code>## Used 10 cell types in deconvolution...</code></pre>
+<pre><code>## S0 has common genes 1184 ...</code></pre>
+<pre><code>## WNNLS Converged at iteration 10</code></pre>
+<pre><code>## S1 has common genes 1184 ...</code></pre>
+<pre><code>## WNNLS Converged at iteration 8</code></pre>
+<pre><code>## S2 has common genes 1184 ...</code></pre>
+<pre><code>## WNNLS Converged at iteration 10</code></pre>
+<pre><code>## S3 has common genes 1184 ...</code></pre>
+<pre><code>## WNNLS Converged at iteration 8</code></pre>
+<pre><code>## S4 has common genes 1184 ...</code></pre>
+<pre><code>## WNNLS Converged at iteration 10</code></pre>
+<pre><code>## S5 has common genes 1184 ...</code></pre>
+<pre><code>## WNNLS Converged at iteration 10</code></pre>
+<pre><code>## S6 has common genes 1184 ...</code></pre>
+<pre><code>## WNNLS Converged at iteration 8</code></pre>
+<pre><code>## S7 has common genes 1184 ...</code></pre>
+<pre><code>## WNNLS Converged at iteration 8</code></pre>
+<pre><code>## S8 has common genes 1184 ...</code></pre>
+<pre><code>## WNNLS Converged at iteration 12</code></pre>
+<pre><code>## S9 has common genes 1184 ...</code></pre>
+<pre><code>## WNNLS Converged at iteration 8</code></pre>
+<pre class="r"><code>result_matrix &lt;-  as.data.frame(ens$prop.est)
 write.table(result_matrix,file=params$SCDCsim,sep=&quot;\t&quot;,col.names=TRUE,row.names=TRUE,quote=FALSE)</code></pre>
 <pre class="r"><code>result_matrix&lt;-read.table(file=params$SCDCsim,sep=&quot;\t&quot;,header=TRUE,row.names=1)
 result_df_wide&lt;- result_matrix %&gt;% 
@@ -5722,14 +5753,14 @@ corbycell&lt;-res %&gt;% group_by(cell.type) %&gt;% summarize(cor(prediction,mea
 rmsdcell&lt;-res %&gt;% group_by(cell.type) %&gt;% summarize(sqrt(mean((measured-prediction)^2)))
 madcell&lt;-res %&gt;% group_by(cell.type) %&gt;% summarize(mean(abs(measured-prediction)))
 DT::datatable(corbycell,caption=&quot;SCDC on BESCA GEP-Correlation by celltype&quot;)</code></pre>
-<div id="htmlwidget-e6a6ba39bd919e63c9c7" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-e6a6ba39bd919e63c9c7">{"x":{"filter":"none","caption":"<caption>SCDC on BESCA GEP-Correlation by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9"],["B.cells","CD4.T.cells","CD8.Tcells","classical.monocytes","DN.Tcells","ILCs","mDCs","not.determined","pDCs"],[0.945607692255005,0.951278303885919,0.936052074444483,0.937358547063383,0.959829368602159,0.929838143820183,0.930342334555964,0.955138076792092,0.974779206998571]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cell.type<\/th>\n      <th>cor(prediction, measured)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-4f2fbb73406630640e04" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-4f2fbb73406630640e04">{"x":{"filter":"none","caption":"<caption>SCDC on BESCA GEP-Correlation by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9"],["B.cells","CD4.T.cells","CD8.Tcells","classical.monocytes","DN.Tcells","ILCs","mDCs","not.determined","pDCs"],[0.945607692255005,0.951278303885919,0.936052074444483,0.937358547063383,0.959829368602159,0.929838143820183,0.930342334555964,0.955138076792092,0.974779206998571]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cell.type<\/th>\n      <th>cor(prediction, measured)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>DT::datatable(rmsdcell,caption=&quot;SCDC on BESCA GEP-RMSD by celltype&quot;)</code></pre>
-<div id="htmlwidget-5b53206f0131294d0275" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-5b53206f0131294d0275">{"x":{"filter":"none","caption":"<caption>SCDC on BESCA GEP-RMSD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9"],["B.cells","CD4.T.cells","CD8.Tcells","classical.monocytes","DN.Tcells","ILCs","mDCs","not.determined","pDCs"],[0.0271579642037628,0.248891575377582,0.0607508955583252,0.0468135059967972,0.0429946873860748,0.0244132046093755,0.0727753024663553,0.0769112597052413,0.0896037341638341]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cell.type<\/th>\n      <th>sqrt(mean((measured - prediction)^2))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-0d7f66b4478c6be30533" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-0d7f66b4478c6be30533">{"x":{"filter":"none","caption":"<caption>SCDC on BESCA GEP-RMSD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9"],["B.cells","CD4.T.cells","CD8.Tcells","classical.monocytes","DN.Tcells","ILCs","mDCs","not.determined","pDCs"],[0.0271579642037628,0.248891575377582,0.0607508955583252,0.0468135059967972,0.0429946873860748,0.0244132046093755,0.0727753024663553,0.0769112597052413,0.0896037341638341]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cell.type<\/th>\n      <th>sqrt(mean((measured - prediction)^2))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>DT::datatable(madcell,caption=&quot;SCDC on BESCA GEP-mAD by celltype&quot;)</code></pre>
-<div id="htmlwidget-f0b57b9a9464d067a595" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-f0b57b9a9464d067a595">{"x":{"filter":"none","caption":"<caption>SCDC on BESCA GEP-mAD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9"],["B.cells","CD4.T.cells","CD8.Tcells","classical.monocytes","DN.Tcells","ILCs","mDCs","not.determined","pDCs"],[0.0210607972044509,0.226832803550544,0.0446669134775069,0.0363870335086564,0.0363144313634455,0.0180028213980872,0.0605105782774239,0.0642365982973826,0.0714705239848902]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cell.type<\/th>\n      <th>mean(abs(measured - prediction))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-11b93b572af0339eed4e" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-11b93b572af0339eed4e">{"x":{"filter":"none","caption":"<caption>SCDC on BESCA GEP-mAD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9"],["B.cells","CD4.T.cells","CD8.Tcells","classical.monocytes","DN.Tcells","ILCs","mDCs","not.determined","pDCs"],[0.0210607972044509,0.226832803550544,0.0446669134775069,0.0363870335086564,0.0363144313634455,0.0180028213980872,0.0605105782774239,0.0642365982973826,0.0714705239848902]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cell.type<\/th>\n      <th>mean(abs(measured - prediction))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>rm(corbycell,rmsdcell, madcell)</code></pre>
 </div>
 <div id="music-1" class="section level3">
@@ -5739,9 +5770,22 @@ DT::datatable(corbycell,caption=&quot;SCDC on BESCA GEP-Correlation by celltype&
         readr::read_csv() %&gt;% 
         as.data.frame() %&gt;%
         tibble::column_to_rownames(&quot;Gene&quot;) %&gt;% 
-        as.matrix()
-
-    #creating phenoData with just sample ID (TKT)
+        as.matrix()</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   Gene = col_character(),
+##   S0 = col_double(),
+##   S1 = col_double(),
+##   S2 = col_double(),
+##   S3 = col_double(),
+##   S4 = col_double(),
+##   S5 = col_double(),
+##   S6 = col_double(),
+##   S7 = col_double(),
+##   S8 = col_double(),
+##   S9 = col_double()
+## )</code></pre>
+<pre class="r"><code>    #creating phenoData with just sample ID (TKT)
     pData&lt;-as.data.frame(colnames(expression_matrix))
     colnames(pData)&lt;-&quot;sample&quot;
     metadata&lt;-data.frame(labelDescription=c(&quot;sample&quot;),row.names=c(&quot;sample&quot;))
@@ -5755,9 +5799,23 @@ rownames(bulk)&lt;-ttunique$external_gene_name[match(rownames(bulk),ttunique$ens
 rownames(bescamerge)&lt;-bescamerge$external_gene_name
 }
 
-out.prop &lt;- music_prop(bulk.eset =bulk, sc.eset =scdata[[1]], clusters = 'cellType', samples='SubjectName')
-
-# write cell fractions into temp file, which is to be loaded by the python wrapper
+out.prop &lt;- music_prop(bulk.eset =bulk, sc.eset =scdata[[1]], clusters = 'cellType', samples='SubjectName')</code></pre>
+<pre><code>## Creating Relative Abudance Matrix...</code></pre>
+<pre><code>## Creating Variance Matrix...</code></pre>
+<pre><code>## Creating Library Size Matrix...</code></pre>
+<pre><code>## Used 1184 common genes...</code></pre>
+<pre><code>## Used 10 cell types in deconvolution...</code></pre>
+<pre><code>## S0 has common genes 1184 ...</code></pre>
+<pre><code>## S1 has common genes 1184 ...</code></pre>
+<pre><code>## S2 has common genes 1184 ...</code></pre>
+<pre><code>## S3 has common genes 1184 ...</code></pre>
+<pre><code>## S4 has common genes 1184 ...</code></pre>
+<pre><code>## S5 has common genes 1184 ...</code></pre>
+<pre><code>## S6 has common genes 1184 ...</code></pre>
+<pre><code>## S7 has common genes 1184 ...</code></pre>
+<pre><code>## S8 has common genes 1184 ...</code></pre>
+<pre><code>## S9 has common genes 1184 ...</code></pre>
+<pre class="r"><code># write cell fractions into temp file, which is to be loaded by the python wrapper
 out.frac &lt;- out.prop$Est.prop.weighted
 
 write.table(out.frac,file=params$MUSICsim,sep=&quot;\t&quot;,col.names=TRUE,row.names=TRUE,quote=FALSE)</code></pre>
@@ -5779,14 +5837,14 @@ ggplot(res,aes(x=prediction,y=measured))+geom_point(aes(color=as.factor(cell.typ
 rmsdcell&lt;-res %&gt;% group_by(cell.type) %&gt;% summarize(sqrt(mean((measured-prediction)^2)))
 madcell&lt;-res %&gt;% group_by(cell.type) %&gt;% summarize(mean(abs(measured-prediction)))
 DT::datatable(corbycell,caption=&quot;Music on BESCA GEP-Correlation by celltype&quot;)</code></pre>
-<div id="htmlwidget-6bef1263feaaebfde8bf" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-6bef1263feaaebfde8bf">{"x":{"filter":"none","caption":"<caption>Music on BESCA GEP-Correlation by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9"],["B.cells","CD4.T.cells","CD8.Tcells","classical.monocytes","DN.Tcells","ILCs","mDCs","not.determined","pDCs"],[0.940401330927522,0.943603728826739,0.94124322618843,0.931267288027146,0.929792443757829,0.920717263384475,0.954783122034225,0.928427035409073,0.972356265902648]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cell.type<\/th>\n      <th>cor(prediction, measured)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-94631f834a609448aca9" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-94631f834a609448aca9">{"x":{"filter":"none","caption":"<caption>Music on BESCA GEP-Correlation by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9"],["B.cells","CD4.T.cells","CD8.Tcells","classical.monocytes","DN.Tcells","ILCs","mDCs","not.determined","pDCs"],[0.940401330927522,0.943603728826739,0.94124322618843,0.931267288027146,0.929792443757829,0.920717263384475,0.954783122034225,0.928427035409073,0.972356265902648]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cell.type<\/th>\n      <th>cor(prediction, measured)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>DT::datatable(rmsdcell,caption=&quot;Music on BESCA GEP-RMSD by celltype&quot;)</code></pre>
-<div id="htmlwidget-a531908cff06017824d2" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-a531908cff06017824d2">{"x":{"filter":"none","caption":"<caption>Music on BESCA GEP-RMSD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9"],["B.cells","CD4.T.cells","CD8.Tcells","classical.monocytes","DN.Tcells","ILCs","mDCs","not.determined","pDCs"],[0.0275068199685479,0.275019800418217,0.0880444591352548,0.0387123557903615,0.068554856327223,0.0259687318966797,0.0758529669181377,0.0796871941082523,0.0906263911788734]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cell.type<\/th>\n      <th>sqrt(mean((measured - prediction)^2))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-24508d41af507503d863" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-24508d41af507503d863">{"x":{"filter":"none","caption":"<caption>Music on BESCA GEP-RMSD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9"],["B.cells","CD4.T.cells","CD8.Tcells","classical.monocytes","DN.Tcells","ILCs","mDCs","not.determined","pDCs"],[0.0275068199685479,0.275019800418217,0.0880444591352548,0.0387123557903615,0.068554856327223,0.0259687318966797,0.0758529669181377,0.0796871941082523,0.0906263911788734]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cell.type<\/th>\n      <th>sqrt(mean((measured - prediction)^2))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>DT::datatable(madcell,caption=&quot;Music on BESCA GEP-mAD by celltype&quot;)</code></pre>
-<div id="htmlwidget-5eeaccc8e79aa3a56c51" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-5eeaccc8e79aa3a56c51">{"x":{"filter":"none","caption":"<caption>Music on BESCA GEP-mAD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9"],["B.cells","CD4.T.cells","CD8.Tcells","classical.monocytes","DN.Tcells","ILCs","mDCs","not.determined","pDCs"],[0.0210372428595296,0.255882092941449,0.0699390034204491,0.0316004507737636,0.0616943255683359,0.019081830727837,0.0634846030072532,0.0666544472590658,0.0725126116267791]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cell.type<\/th>\n      <th>mean(abs(measured - prediction))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-e19893f201e5915cccee" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-e19893f201e5915cccee">{"x":{"filter":"none","caption":"<caption>Music on BESCA GEP-mAD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9"],["B.cells","CD4.T.cells","CD8.Tcells","classical.monocytes","DN.Tcells","ILCs","mDCs","not.determined","pDCs"],[0.0210372428595296,0.255882092941449,0.0699390034204491,0.0316004507737636,0.0616943255683359,0.019081830727837,0.0634846030072532,0.0666544472590658,0.0725126116267791]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cell.type<\/th>\n      <th>mean(abs(measured - prediction))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>rm(corbycell,rmsdcell, madcell)</code></pre>
 </div>
 </div>
@@ -5947,14 +6005,14 @@ corbycell&lt;-res %&gt;% group_by(cluster.id) %&gt;% summarize(cor(prediction,me
 rmsdcell&lt;-res %&gt;% group_by(cluster.id) %&gt;% summarize(sqrt(mean((measured-prediction)^2)))
 madcell&lt;-res %&gt;% group_by(cluster.id) %&gt;% summarize(mean(abs(measured-prediction)))
 DT::datatable(corbycell,caption=&quot;SCDC on SCDC GEP-Correlation by celltype&quot;)</code></pre>
-<div id="htmlwidget-8ecee90e9ae0de72d990" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-8ecee90e9ae0de72d990">{"x":{"filter":"none","caption":"<caption>SCDC on SCDC GEP-Correlation by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["B.cells","CD4.T.cells","CD8.Tcells","classical.monocytes","DN.Tcells","ILCs","mDCs","non.classical.monocytes","not.determined","pDCs"],[0.976957419161532,0.786410604859297,0.900859253439353,0.987506215425077,0.128942147894089,0.806586462905181,0.746125791990649,0.811280530133542,0.557736630887871,0.609910996767918]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster.id<\/th>\n      <th>cor(prediction, measured)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-d8e90e75458d853787a7" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-d8e90e75458d853787a7">{"x":{"filter":"none","caption":"<caption>SCDC on SCDC GEP-Correlation by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["B.cells","CD4.T.cells","CD8.Tcells","classical.monocytes","DN.Tcells","ILCs","mDCs","non.classical.monocytes","not.determined","pDCs"],[0.976957419161532,0.786410604859297,0.900859253439353,0.987506215425077,0.128942147894089,0.806586462905181,0.746125791990649,0.811280530133542,0.557736630887871,0.609910996767918]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster.id<\/th>\n      <th>cor(prediction, measured)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>DT::datatable(rmsdcell,caption=&quot;SCDC on SCDC GEP-RMSD by celltype&quot;)</code></pre>
-<div id="htmlwidget-b744f805bb481578cbbd" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-b744f805bb481578cbbd">{"x":{"filter":"none","caption":"<caption>SCDC on SCDC GEP-RMSD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["B.cells","CD4.T.cells","CD8.Tcells","classical.monocytes","DN.Tcells","ILCs","mDCs","non.classical.monocytes","not.determined","pDCs"],[0.00862017280509249,0.0747121589496262,0.0214626270570849,0.0137651378520356,0.077848798811613,0.0311856361584779,0.00949682798104596,0.00861101588808503,0.0332889142560016,0.00304224919456601]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster.id<\/th>\n      <th>sqrt(mean((measured - prediction)^2))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-1b0506e85d74277d41ea" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1b0506e85d74277d41ea">{"x":{"filter":"none","caption":"<caption>SCDC on SCDC GEP-RMSD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["B.cells","CD4.T.cells","CD8.Tcells","classical.monocytes","DN.Tcells","ILCs","mDCs","non.classical.monocytes","not.determined","pDCs"],[0.00862017280509249,0.0747121589496262,0.0214626270570849,0.0137651378520356,0.077848798811613,0.0311856361584779,0.00949682798104596,0.00861101588808503,0.0332889142560016,0.00304224919456601]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster.id<\/th>\n      <th>sqrt(mean((measured - prediction)^2))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>DT::datatable(madcell,caption=&quot;SCDC on SCDC GEP-mAD by celltype&quot;)</code></pre>
-<div id="htmlwidget-d99e647c60cd2eb23305" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-d99e647c60cd2eb23305">{"x":{"filter":"none","caption":"<caption>SCDC on SCDC GEP-mAD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["B.cells","CD4.T.cells","CD8.Tcells","classical.monocytes","DN.Tcells","ILCs","mDCs","non.classical.monocytes","not.determined","pDCs"],[0.00690101428922855,0.0624601371866015,0.0163831928206039,0.0107368280114074,0.057583780558171,0.024219566422651,0.00766117991997289,0.00687351564857411,0.0259285057943051,0.00238628185345099]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster.id<\/th>\n      <th>mean(abs(measured - prediction))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-d695f2e6366df2c4ceef" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-d695f2e6366df2c4ceef">{"x":{"filter":"none","caption":"<caption>SCDC on SCDC GEP-mAD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["B.cells","CD4.T.cells","CD8.Tcells","classical.monocytes","DN.Tcells","ILCs","mDCs","non.classical.monocytes","not.determined","pDCs"],[0.00690101428922855,0.0624601371866015,0.0163831928206039,0.0107368280114074,0.057583780558171,0.024219566422651,0.00766117991997289,0.00687351564857411,0.0259285057943051,0.00238628185345099]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster.id<\/th>\n      <th>mean(abs(measured - prediction))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>rm(corbycell,rmsdcell, madcell)
 
 
@@ -5995,14 +6053,14 @@ corbycell&lt;-res %&gt;% group_by(cluster.id) %&gt;% summarize(cor(prediction,me
 rmsdcell&lt;-res %&gt;% group_by(cluster.id) %&gt;% summarize(sqrt(mean((measured-prediction)^2)))
 madcell&lt;-res %&gt;% group_by(cluster.id) %&gt;% summarize(mean(abs(measured-prediction)))
 DT::datatable(corbycell,caption=&quot;SCDC on SCDC GEP-Correlation by celltype&quot;)</code></pre>
-<div id="htmlwidget-7b36c5716438124724a3" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-7b36c5716438124724a3">{"x":{"filter":"none","caption":"<caption>SCDC on SCDC GEP-Correlation by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["B.cells","CD4.T.cells","CD8.Tcells","classical.monocytes","DN.Tcells","ILCs","mDCs","non.classical.monocytes","not.determined","pDCs"],[0.958115658627342,0.735194827403871,0.464236556529325,0.987099298894405,0.549876700744466,0.88380909908011,0.608783594095475,0.805942614384656,0.407056394388233,0.872354232242641]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster.id<\/th>\n      <th>cor(prediction, measured)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-5b18c926049116bd29c4" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-5b18c926049116bd29c4">{"x":{"filter":"none","caption":"<caption>SCDC on SCDC GEP-Correlation by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["B.cells","CD4.T.cells","CD8.Tcells","classical.monocytes","DN.Tcells","ILCs","mDCs","non.classical.monocytes","not.determined","pDCs"],[0.958115658627342,0.735194827403871,0.464236556529325,0.987099298894405,0.549876700744466,0.88380909908011,0.608783594095475,0.805942614384656,0.407056394388233,0.872354232242641]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster.id<\/th>\n      <th>cor(prediction, measured)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>DT::datatable(rmsdcell,caption=&quot;SCDC on SCDC GEP-RMSD by celltype&quot;)</code></pre>
-<div id="htmlwidget-4b7267ed232e0d8aa059" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-4b7267ed232e0d8aa059">{"x":{"filter":"none","caption":"<caption>SCDC on SCDC GEP-RMSD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["B.cells","CD4.T.cells","CD8.Tcells","classical.monocytes","DN.Tcells","ILCs","mDCs","non.classical.monocytes","not.determined","pDCs"],[0.0158092396766091,0.116305523507218,0.108866915546441,0.0256311188314743,0.0924041240486716,0.0260399958874499,0.011082698781352,0.0117540147971711,0.0284492777525846,0.00363939985168977]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster.id<\/th>\n      <th>sqrt(mean((measured - prediction)^2))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-0eeb36bc8d4a80abede9" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-0eeb36bc8d4a80abede9">{"x":{"filter":"none","caption":"<caption>SCDC on SCDC GEP-RMSD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["B.cells","CD4.T.cells","CD8.Tcells","classical.monocytes","DN.Tcells","ILCs","mDCs","non.classical.monocytes","not.determined","pDCs"],[0.0158092396766091,0.116305523507218,0.108866915546441,0.0256311188314743,0.0924041240486716,0.0260399958874499,0.011082698781352,0.0117540147971711,0.0284492777525846,0.00363939985168977]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster.id<\/th>\n      <th>sqrt(mean((measured - prediction)^2))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>DT::datatable(madcell,caption=&quot;SCDC on SCDC GEP-mAD by celltype&quot;)</code></pre>
-<div id="htmlwidget-1fa823ff23ee69f272cc" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-1fa823ff23ee69f272cc">{"x":{"filter":"none","caption":"<caption>SCDC on SCDC GEP-mAD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["B.cells","CD4.T.cells","CD8.Tcells","classical.monocytes","DN.Tcells","ILCs","mDCs","non.classical.monocytes","not.determined","pDCs"],[0.012572236775462,0.0928743447561653,0.088171825983301,0.021155329112432,0.0766212390039697,0.0208969415591202,0.00942619108342849,0.00909239968535942,0.0222525026699106,0.00305729949747276]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster.id<\/th>\n      <th>mean(abs(measured - prediction))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-4ec43067aaa4e880b411" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-4ec43067aaa4e880b411">{"x":{"filter":"none","caption":"<caption>SCDC on SCDC GEP-mAD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["B.cells","CD4.T.cells","CD8.Tcells","classical.monocytes","DN.Tcells","ILCs","mDCs","non.classical.monocytes","not.determined","pDCs"],[0.012572236775462,0.0928743447561653,0.088171825983301,0.021155329112432,0.0766212390039697,0.0208969415591202,0.00942619108342849,0.00909239968535942,0.0222525026699106,0.00305729949747276]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster.id<\/th>\n      <th>mean(abs(measured - prediction))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>rm(corbycell,rmsdcell, madcell)
 
 

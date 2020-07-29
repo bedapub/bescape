@@ -34,7 +34,6 @@ vignette: >
 ---
 
 # GEP-Comparisons of the BESCA GEP vs. scRNASeq Reference datasets 
-## Segerstolpe
 
 ```{r loadLibrary, fig.width=20, fig.height=18,message=FALSE,eval=TRUE}
 #.libPaths(c("~/R/x86_64-pc-linux-gnu-library/3.6",.libPaths()))
@@ -52,8 +51,7 @@ dpispec<-600
 figwspec<-8.5
 fighspec<-17.5
 
-test<-params$truth
-print(getwd())
+
 truth<-read.table(file=params$truth,sep=",",header=TRUE)
 scdata = list(0)
 scfilelist<-params$scfilelist
