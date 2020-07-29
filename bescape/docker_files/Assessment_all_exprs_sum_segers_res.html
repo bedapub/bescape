@@ -5405,8 +5405,6 @@ div.tocify {
 
 <div id="gep-comparisons-of-the-besca-gep-vs.scrnaseq-reference-datasets" class="section level1">
 <h1>GEP-Comparisons of the BESCA GEP vs. scRNASeq Reference datasets</h1>
-<div id="segerstolpe" class="section level2">
-<h2>Segerstolpe</h2>
 <pre class="r"><code>#.libPaths(c(&quot;~/R/x86_64-pc-linux-gnu-library/3.6&quot;,.libPaths()))
 suppressMessages(library(MuSiC))
 suppressMessages(library(BisqueRNA))
@@ -5422,10 +5420,8 @@ dpispec&lt;-600
 figwspec&lt;-8.5
 fighspec&lt;-17.5
 
-test&lt;-params$truth
-print(getwd())</code></pre>
-<pre><code>## [1] &quot;/pstore/home/kamthont/bescape/bescape/docker_files&quot;</code></pre>
-<pre class="r"><code>truth&lt;-read.table(file=params$truth,sep=&quot;,&quot;,header=TRUE)
+
+truth&lt;-read.table(file=params$truth,sep=&quot;,&quot;,header=TRUE)
 scdata = list(0)
 scfilelist&lt;-params$scfilelist
 nscdata&lt;-length(scfilelist)
@@ -5505,7 +5501,6 @@ heatmap.2(as.matrix(besca_basis%&gt;% dplyr::select(-name)),labRow=FALSE,main=&q
 #pdf(paste0(&quot;./figures/&quot;,params$studyname,&quot;Mergedbases_subset.pdf&quot;))
 #heatmap.2(as.matrix(merge_justBESCAgenes%&gt;% dplyr::select(-name)),labRow=FALSE,main=&quot;MUSIC SCDC BESCA GEPs \n BESCA Genes&quot;,col=bluered(100), trace=&quot;none&quot;,scale=&quot;row&quot;,xlab=&quot;Celltypes&quot;,cexCol=0.4,srtCol=45,key.par=list(cex=0.5))
 #dev.off()</code></pre>
-</div>
 </div>
 <div id="estimates-of-proportions-using-the-different-tools" class="section level1">
 <h1>Estimates of Proportions using the different tools</h1>
@@ -5853,9 +5848,22 @@ expression_matrix &lt;- expression_path %&gt;%
         readr::read_csv() %&gt;% 
         as.data.frame() %&gt;%
         tibble::column_to_rownames(&quot;Gene&quot;) %&gt;% 
-        as.matrix()
-
-#creating phenoData with just sample ID (TKT)
+        as.matrix()</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   Gene = col_character(),
+##   S0 = col_double(),
+##   S1 = col_double(),
+##   S2 = col_double(),
+##   S3 = col_double(),
+##   S4 = col_double(),
+##   S5 = col_double(),
+##   S6 = col_double(),
+##   S7 = col_double(),
+##   S8 = col_double(),
+##   S9 = col_double()
+## )</code></pre>
+<pre class="r"><code>#creating phenoData with just sample ID (TKT)
 pData&lt;-as.data.frame(colnames(expression_matrix))
 colnames(pData)&lt;-&quot;sample&quot;
 metadata&lt;-data.frame(labelDescription=c(&quot;sample&quot;),row.names=c(&quot;sample&quot;))
@@ -5868,8 +5876,31 @@ rownames(bulk)&lt;-ttunique$external_gene_name[match(rownames(bulk),ttunique$ens
 }
 
 
-ens &lt;- SCDC_prop(bulk.eset = bulk, sc.eset = scdata[[1]], ct.varname = params$celltypevar, sample = params$samplevar, truep = NULL, ct.sub = celltype , search.length = 0.01, grid.search = T)  
-result_matrix &lt;-  as.data.frame(ens$prop.est)
+ens &lt;- SCDC_prop(bulk.eset = bulk, sc.eset = scdata[[1]], ct.varname = params$celltypevar, sample = params$samplevar, truep = NULL, ct.sub = celltype , search.length = 0.01, grid.search = T)  </code></pre>
+<pre><code>## Creating Basis Matrix adjusted for maximal variance weight</code></pre>
+<pre><code>## Used 5026 common genes...</code></pre>
+<pre><code>## Used 10 cell types in deconvolution...</code></pre>
+<pre><code>## S0 has common genes 5026 ...</code></pre>
+<pre><code>## WNNLS Converged at iteration 10</code></pre>
+<pre><code>## S1 has common genes 5026 ...</code></pre>
+<pre><code>## WNNLS Converged at iteration 8</code></pre>
+<pre><code>## S2 has common genes 5026 ...</code></pre>
+<pre><code>## WNNLS Converged at iteration 4</code></pre>
+<pre><code>## S3 has common genes 5026 ...</code></pre>
+<pre><code>## WNNLS Converged at iteration 6</code></pre>
+<pre><code>## S4 has common genes 5026 ...</code></pre>
+<pre><code>## WNNLS Converged at iteration 4</code></pre>
+<pre><code>## S5 has common genes 5026 ...</code></pre>
+<pre><code>## WNNLS Converged at iteration 8</code></pre>
+<pre><code>## S6 has common genes 5026 ...</code></pre>
+<pre><code>## WNNLS Converged at iteration 10</code></pre>
+<pre><code>## S7 has common genes 5026 ...</code></pre>
+<pre><code>## WNNLS Converged at iteration 4</code></pre>
+<pre><code>## S8 has common genes 5026 ...</code></pre>
+<pre><code>## WNNLS Converged at iteration 10</code></pre>
+<pre><code>## S9 has common genes 5026 ...</code></pre>
+<pre><code>## WNNLS Converged at iteration 8</code></pre>
+<pre class="r"><code>result_matrix &lt;-  as.data.frame(ens$prop.est)
 write.table(result_matrix,file=params$SCDCsim,sep=&quot;\t&quot;,col.names=TRUE,row.names=TRUE,quote=FALSE)</code></pre>
 <pre class="r"><code>result_matrix&lt;-read.table(file=params$SCDCsim,sep=&quot;\t&quot;,header=TRUE,row.names=1)
 result_df_wide&lt;- result_matrix %&gt;% 
@@ -5889,14 +5920,14 @@ corbycell&lt;-res %&gt;% group_by(cell.type) %&gt;% summarize(cor(prediction,mea
 rmsdcell&lt;-res %&gt;% group_by(cell.type) %&gt;% summarize(sqrt(mean((measured-prediction)^2)))
 madcell&lt;-res %&gt;% group_by(cell.type) %&gt;% summarize(mean(abs(measured-prediction)))
 DT::datatable(corbycell,caption=&quot;SCDC on BESCA GEP-Correlation by celltype&quot;)</code></pre>
-<div id="htmlwidget-31734246f3ed64fc65dc" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-31734246f3ed64fc65dc">{"x":{"filter":"none","caption":"<caption>SCDC on BESCA GEP-Correlation by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["blood.vessel.endothelial.cell","enteroendocrine.cell","fibroblast","macrophage","pancreatic.A.cell","pancreatic.acinar.cell","pancreatic.D.cell","pancreatic.ductal.cell","PP.cell","type.B.pancreatic.cell"],[0.984319621853146,0.880553346627692,0.877546257049156,0.919921760453321,0.878188584568223,0.933074767318126,0.923317180852331,0.947845164993237,0.949971849094632,0.979419841696686]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cell.type<\/th>\n      <th>cor(prediction, measured)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-40737ccee573d8965a86" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-40737ccee573d8965a86">{"x":{"filter":"none","caption":"<caption>SCDC on BESCA GEP-Correlation by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["blood.vessel.endothelial.cell","enteroendocrine.cell","fibroblast","macrophage","pancreatic.A.cell","pancreatic.acinar.cell","pancreatic.D.cell","pancreatic.ductal.cell","PP.cell","type.B.pancreatic.cell"],[0.984319621853146,0.880553346627692,0.877546257049156,0.919921760453321,0.878188584568223,0.933074767318126,0.923317180852331,0.947845164993237,0.949971849094632,0.979419841696686]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cell.type<\/th>\n      <th>cor(prediction, measured)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>DT::datatable(rmsdcell,caption=&quot;SCDC on BESCA GEP-RMSD by celltype&quot;)</code></pre>
-<div id="htmlwidget-bf6fc8043a41f9e69429" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-bf6fc8043a41f9e69429">{"x":{"filter":"none","caption":"<caption>SCDC on BESCA GEP-RMSD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["blood.vessel.endothelial.cell","enteroendocrine.cell","fibroblast","macrophage","pancreatic.A.cell","pancreatic.acinar.cell","pancreatic.D.cell","pancreatic.ductal.cell","PP.cell","type.B.pancreatic.cell"],[0.130542665608034,0.0944805238231406,0.124824868251006,0.111487793694787,0.283415887026463,0.0268115003558345,0.0331571764852476,0.124805590337857,0.0234519100172495,0.0408142797114461]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cell.type<\/th>\n      <th>sqrt(mean((measured - prediction)^2))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-d7dcffbfcd907f0e5908" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-d7dcffbfcd907f0e5908">{"x":{"filter":"none","caption":"<caption>SCDC on BESCA GEP-RMSD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["blood.vessel.endothelial.cell","enteroendocrine.cell","fibroblast","macrophage","pancreatic.A.cell","pancreatic.acinar.cell","pancreatic.D.cell","pancreatic.ductal.cell","PP.cell","type.B.pancreatic.cell"],[0.130542665608034,0.0944805238231406,0.124824868251006,0.111487793694787,0.283415887026463,0.0268115003558345,0.0331571764852476,0.124805590337857,0.0234519100172495,0.0408142797114461]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cell.type<\/th>\n      <th>sqrt(mean((measured - prediction)^2))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>DT::datatable(madcell,caption=&quot;SCDC on BESCA GEP-mAD by celltype&quot;)</code></pre>
-<div id="htmlwidget-6de79e5eb323b4e9f8a9" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-6de79e5eb323b4e9f8a9">{"x":{"filter":"none","caption":"<caption>SCDC on BESCA GEP-mAD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["blood.vessel.endothelial.cell","enteroendocrine.cell","fibroblast","macrophage","pancreatic.A.cell","pancreatic.acinar.cell","pancreatic.D.cell","pancreatic.ductal.cell","PP.cell","type.B.pancreatic.cell"],[0.112281961601251,0.0782758500650592,0.1108008323852,0.0981178622224506,0.26554707716842,0.0203170536807601,0.0247268497181808,0.109271009084509,0.0203035091143115,0.0368600578830979]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cell.type<\/th>\n      <th>mean(abs(measured - prediction))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-f7cf4089c291f16caf97" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-f7cf4089c291f16caf97">{"x":{"filter":"none","caption":"<caption>SCDC on BESCA GEP-mAD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["blood.vessel.endothelial.cell","enteroendocrine.cell","fibroblast","macrophage","pancreatic.A.cell","pancreatic.acinar.cell","pancreatic.D.cell","pancreatic.ductal.cell","PP.cell","type.B.pancreatic.cell"],[0.112281961601251,0.0782758500650592,0.1108008323852,0.0981178622224506,0.26554707716842,0.0203170536807601,0.0247268497181808,0.109271009084509,0.0203035091143115,0.0368600578830979]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cell.type<\/th>\n      <th>mean(abs(measured - prediction))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>rm(corbycell,rmsdcell, madcell)</code></pre>
 </div>
 <div id="music-1" class="section level3">
@@ -5906,9 +5937,22 @@ DT::datatable(corbycell,caption=&quot;SCDC on BESCA GEP-Correlation by celltype&
         readr::read_csv() %&gt;% 
         as.data.frame() %&gt;%
         tibble::column_to_rownames(&quot;Gene&quot;) %&gt;% 
-        as.matrix()
-
-    #creating phenoData with just sample ID (TKT)
+        as.matrix()</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   Gene = col_character(),
+##   S0 = col_double(),
+##   S1 = col_double(),
+##   S2 = col_double(),
+##   S3 = col_double(),
+##   S4 = col_double(),
+##   S5 = col_double(),
+##   S6 = col_double(),
+##   S7 = col_double(),
+##   S8 = col_double(),
+##   S9 = col_double()
+## )</code></pre>
+<pre class="r"><code>    #creating phenoData with just sample ID (TKT)
     pData&lt;-as.data.frame(colnames(expression_matrix))
     colnames(pData)&lt;-&quot;sample&quot;
     metadata&lt;-data.frame(labelDescription=c(&quot;sample&quot;),row.names=c(&quot;sample&quot;))
@@ -5922,9 +5966,23 @@ rownames(bulk)&lt;-ttunique$external_gene_name[match(rownames(bulk),ttunique$ens
 rownames(bescamerge)&lt;-bescamerge$external_gene_name
 }
 
-out.prop &lt;- music_prop(bulk.eset =bulk, sc.eset =scdata[[1]], clusters = 'cellType', samples='SubjectName')
-
-# write cell fractions into temp file, which is to be loaded by the python wrapper
+out.prop &lt;- music_prop(bulk.eset =bulk, sc.eset =scdata[[1]], clusters = 'cellType', samples='SubjectName')</code></pre>
+<pre><code>## Creating Relative Abudance Matrix...</code></pre>
+<pre><code>## Creating Variance Matrix...</code></pre>
+<pre><code>## Creating Library Size Matrix...</code></pre>
+<pre><code>## Used 5026 common genes...</code></pre>
+<pre><code>## Used 10 cell types in deconvolution...</code></pre>
+<pre><code>## S0 has common genes 5026 ...</code></pre>
+<pre><code>## S1 has common genes 5026 ...</code></pre>
+<pre><code>## S2 has common genes 5026 ...</code></pre>
+<pre><code>## S3 has common genes 5026 ...</code></pre>
+<pre><code>## S4 has common genes 5026 ...</code></pre>
+<pre><code>## S5 has common genes 5026 ...</code></pre>
+<pre><code>## S6 has common genes 5026 ...</code></pre>
+<pre><code>## S7 has common genes 5026 ...</code></pre>
+<pre><code>## S8 has common genes 5026 ...</code></pre>
+<pre><code>## S9 has common genes 5026 ...</code></pre>
+<pre class="r"><code># write cell fractions into temp file, which is to be loaded by the python wrapper
 out.frac &lt;- out.prop$Est.prop.weighted
 
 write.table(out.frac,file=params$MUSICsim,sep=&quot;\t&quot;,col.names=TRUE,row.names=TRUE,quote=FALSE)</code></pre>
@@ -5946,14 +6004,14 @@ ggplot(res,aes(x=prediction,y=measured))+geom_point(aes(color=as.factor(cell.typ
 rmsdcell&lt;-res %&gt;% group_by(cell.type) %&gt;% summarize(sqrt(mean((measured-prediction)^2)))
 madcell&lt;-res %&gt;% group_by(cell.type) %&gt;% summarize(mean(abs(measured-prediction)))
 DT::datatable(corbycell,caption=&quot;Music on BESCA GEP-Correlation by celltype&quot;)</code></pre>
-<div id="htmlwidget-0a5bad9d67a25444fac9" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-0a5bad9d67a25444fac9">{"x":{"filter":"none","caption":"<caption>Music on BESCA GEP-Correlation by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["blood.vessel.endothelial.cell","enteroendocrine.cell","fibroblast","macrophage","pancreatic.A.cell","pancreatic.acinar.cell","pancreatic.D.cell","pancreatic.ductal.cell","PP.cell","type.B.pancreatic.cell"],[0.984522922976406,0.971177990347384,0.940856370261977,0.933082241445561,0.943221214121518,0.928433687393389,0.958865875957256,0.951148240704193,0.974177636783812,0.969298512215316]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cell.type<\/th>\n      <th>cor(prediction, measured)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-6f5e27be86d1981b1c7b" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-6f5e27be86d1981b1c7b">{"x":{"filter":"none","caption":"<caption>Music on BESCA GEP-Correlation by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["blood.vessel.endothelial.cell","enteroendocrine.cell","fibroblast","macrophage","pancreatic.A.cell","pancreatic.acinar.cell","pancreatic.D.cell","pancreatic.ductal.cell","PP.cell","type.B.pancreatic.cell"],[0.984522922976406,0.971177990347384,0.940856370261977,0.933082241445561,0.943221214121518,0.928433687393389,0.958865875957256,0.951148240704193,0.974177636783812,0.969298512215316]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cell.type<\/th>\n      <th>cor(prediction, measured)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>DT::datatable(rmsdcell,caption=&quot;Music on BESCA GEP-RMSD by celltype&quot;)</code></pre>
-<div id="htmlwidget-e214e99fa72a537f4c97" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-e214e99fa72a537f4c97">{"x":{"filter":"none","caption":"<caption>Music on BESCA GEP-RMSD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["blood.vessel.endothelial.cell","enteroendocrine.cell","fibroblast","macrophage","pancreatic.A.cell","pancreatic.acinar.cell","pancreatic.D.cell","pancreatic.ductal.cell","PP.cell","type.B.pancreatic.cell"],[0.120951155674174,0.0188304681022923,0.107676734198976,0.108804757887776,0.331998270464121,0.0316230591733721,0.0422108070801319,0.0617973473135357,0.0265801847893522,0.0261095606342896]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cell.type<\/th>\n      <th>sqrt(mean((measured - prediction)^2))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-ba49b8107f776d0f9223" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-ba49b8107f776d0f9223">{"x":{"filter":"none","caption":"<caption>Music on BESCA GEP-RMSD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["blood.vessel.endothelial.cell","enteroendocrine.cell","fibroblast","macrophage","pancreatic.A.cell","pancreatic.acinar.cell","pancreatic.D.cell","pancreatic.ductal.cell","PP.cell","type.B.pancreatic.cell"],[0.120951155674174,0.0188304681022923,0.107676734198976,0.108804757887776,0.331998270464121,0.0316230591733721,0.0422108070801319,0.0617973473135357,0.0265801847893522,0.0261095606342896]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cell.type<\/th>\n      <th>sqrt(mean((measured - prediction)^2))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>DT::datatable(madcell,caption=&quot;Music on BESCA GEP-mAD by celltype&quot;)</code></pre>
-<div id="htmlwidget-55025a53a7e79a17219d" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-55025a53a7e79a17219d">{"x":{"filter":"none","caption":"<caption>Music on BESCA GEP-mAD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["blood.vessel.endothelial.cell","enteroendocrine.cell","fibroblast","macrophage","pancreatic.A.cell","pancreatic.acinar.cell","pancreatic.D.cell","pancreatic.ductal.cell","PP.cell","type.B.pancreatic.cell"],[0.104631079338341,0.0139092416812738,0.095071684115683,0.095734091271046,0.312996982349809,0.0233851934833019,0.0335512263220872,0.0470770609850569,0.0212529476551184,0.0169799715678617]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cell.type<\/th>\n      <th>mean(abs(measured - prediction))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-23cdc80418213f782935" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-23cdc80418213f782935">{"x":{"filter":"none","caption":"<caption>Music on BESCA GEP-mAD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["blood.vessel.endothelial.cell","enteroendocrine.cell","fibroblast","macrophage","pancreatic.A.cell","pancreatic.acinar.cell","pancreatic.D.cell","pancreatic.ductal.cell","PP.cell","type.B.pancreatic.cell"],[0.104631079338341,0.0139092416812738,0.095071684115683,0.095734091271046,0.312996982349809,0.0233851934833019,0.0335512263220872,0.0470770609850569,0.0212529476551184,0.0169799715678617]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cell.type<\/th>\n      <th>mean(abs(measured - prediction))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>rm(corbycell,rmsdcell, madcell)</code></pre>
 </div>
 </div>
@@ -6096,14 +6154,14 @@ corbycell&lt;-res %&gt;% group_by(cluster.id) %&gt;% summarize(cor(prediction,me
 rmsdcell&lt;-res %&gt;% group_by(cluster.id) %&gt;% summarize(sqrt(mean((measured-prediction)^2)))
 madcell&lt;-res %&gt;% group_by(cluster.id) %&gt;% summarize(mean(abs(measured-prediction)))
 DT::datatable(corbycell,caption=&quot;SCDC on SCDC GEP-Correlation by celltype&quot;)</code></pre>
-<div id="htmlwidget-a70299134b449c5246cc" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-a70299134b449c5246cc">{"x":{"filter":"none","caption":"<caption>SCDC on SCDC GEP-Correlation by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["blood.vessel.endothelial.cell","enteroendocrine.cell","fibroblast","macrophage","pancreatic.A.cell","pancreatic.acinar.cell","pancreatic.D.cell","pancreatic.ductal.cell","PP.cell","type.B.pancreatic.cell"],[0.677788756315872,0.515189876078792,0.865523724968769,0.974856995116745,0.972505366147285,0.99350329673818,0.876544102178465,0.834001942725696,0.870782124746662,0.942833167535692]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster.id<\/th>\n      <th>cor(prediction, measured)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-2d4a0a52efb90b12e6d8" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-2d4a0a52efb90b12e6d8">{"x":{"filter":"none","caption":"<caption>SCDC on SCDC GEP-Correlation by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["blood.vessel.endothelial.cell","enteroendocrine.cell","fibroblast","macrophage","pancreatic.A.cell","pancreatic.acinar.cell","pancreatic.D.cell","pancreatic.ductal.cell","PP.cell","type.B.pancreatic.cell"],[0.677788756315872,0.515189876078792,0.865523724968769,0.974856995116745,0.972505366147285,0.99350329673818,0.876544102178465,0.834001942725696,0.870782124746662,0.942833167535692]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster.id<\/th>\n      <th>cor(prediction, measured)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>DT::datatable(rmsdcell,caption=&quot;SCDC on SCDC GEP-RMSD by celltype&quot;)</code></pre>
-<div id="htmlwidget-6d2745c63266083c6f27" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-6d2745c63266083c6f27">{"x":{"filter":"none","caption":"<caption>SCDC on SCDC GEP-RMSD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["blood.vessel.endothelial.cell","enteroendocrine.cell","fibroblast","macrophage","pancreatic.A.cell","pancreatic.acinar.cell","pancreatic.D.cell","pancreatic.ductal.cell","PP.cell","type.B.pancreatic.cell"],[0.017001713146968,0.0641955874534156,0.0201538589742267,0.00412935310321791,0.0426190692167801,0.0492439647360705,0.0228807063800691,0.0748288231042056,0.0405263997671075,0.0551144538367876]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster.id<\/th>\n      <th>sqrt(mean((measured - prediction)^2))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-56cc5e4cc4956e8db195" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-56cc5e4cc4956e8db195">{"x":{"filter":"none","caption":"<caption>SCDC on SCDC GEP-RMSD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["blood.vessel.endothelial.cell","enteroendocrine.cell","fibroblast","macrophage","pancreatic.A.cell","pancreatic.acinar.cell","pancreatic.D.cell","pancreatic.ductal.cell","PP.cell","type.B.pancreatic.cell"],[0.017001713146968,0.0641955874534156,0.0201538589742267,0.00412935310321791,0.0426190692167801,0.0492439647360705,0.0228807063800691,0.0748288231042056,0.0405263997671075,0.0551144538367876]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster.id<\/th>\n      <th>sqrt(mean((measured - prediction)^2))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>DT::datatable(madcell,caption=&quot;SCDC on SCDC GEP-mAD by celltype&quot;)</code></pre>
-<div id="htmlwidget-fb09afb8493b932079b9" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-fb09afb8493b932079b9">{"x":{"filter":"none","caption":"<caption>SCDC on SCDC GEP-mAD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["blood.vessel.endothelial.cell","enteroendocrine.cell","fibroblast","macrophage","pancreatic.A.cell","pancreatic.acinar.cell","pancreatic.D.cell","pancreatic.ductal.cell","PP.cell","type.B.pancreatic.cell"],[0.0103318997102768,0.0470122188927393,0.0166751887576425,0.00230219893459441,0.0333396762914657,0.0244198899412221,0.0177218292671629,0.0431587388953356,0.0328120747219293,0.0401395453032956]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster.id<\/th>\n      <th>mean(abs(measured - prediction))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-cd1317c5f943e8c6d931" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-cd1317c5f943e8c6d931">{"x":{"filter":"none","caption":"<caption>SCDC on SCDC GEP-mAD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["blood.vessel.endothelial.cell","enteroendocrine.cell","fibroblast","macrophage","pancreatic.A.cell","pancreatic.acinar.cell","pancreatic.D.cell","pancreatic.ductal.cell","PP.cell","type.B.pancreatic.cell"],[0.0103318997102768,0.0470122188927393,0.0166751887576425,0.00230219893459441,0.0333396762914657,0.0244198899412221,0.0177218292671629,0.0431587388953356,0.0328120747219293,0.0401395453032956]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster.id<\/th>\n      <th>mean(abs(measured - prediction))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>rm(corbycell,rmsdcell, madcell)
 
 
@@ -6144,14 +6202,14 @@ corbycell&lt;-res %&gt;% group_by(cluster.id) %&gt;% summarize(cor(prediction,me
 rmsdcell&lt;-res %&gt;% group_by(cluster.id) %&gt;% summarize(sqrt(mean((measured-prediction)^2)))
 madcell&lt;-res %&gt;% group_by(cluster.id) %&gt;% summarize(mean(abs(measured-prediction)))
 DT::datatable(corbycell,caption=&quot;SCDC on SCDC GEP-Correlation by celltype&quot;)</code></pre>
-<div id="htmlwidget-d0fe2d765c418f001ddf" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-d0fe2d765c418f001ddf">{"x":{"filter":"none","caption":"<caption>SCDC on SCDC GEP-Correlation by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["blood.vessel.endothelial.cell","enteroendocrine.cell","fibroblast","macrophage","pancreatic.A.cell","pancreatic.acinar.cell","pancreatic.D.cell","pancreatic.ductal.cell","PP.cell","type.B.pancreatic.cell"],[0.729019396368836,0.668843150059223,0.81887872241047,0.95200802799103,0.966378469748822,0.992936673550529,0.824438282615298,0.903520855377361,0.918384368568516,0.88452792868175]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster.id<\/th>\n      <th>cor(prediction, measured)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-dd38210f06492ec812f0" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-dd38210f06492ec812f0">{"x":{"filter":"none","caption":"<caption>SCDC on SCDC GEP-Correlation by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["blood.vessel.endothelial.cell","enteroendocrine.cell","fibroblast","macrophage","pancreatic.A.cell","pancreatic.acinar.cell","pancreatic.D.cell","pancreatic.ductal.cell","PP.cell","type.B.pancreatic.cell"],[0.729019396368836,0.668843150059223,0.81887872241047,0.95200802799103,0.966378469748822,0.992936673550529,0.824438282615298,0.903520855377361,0.918384368568516,0.88452792868175]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster.id<\/th>\n      <th>cor(prediction, measured)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>DT::datatable(rmsdcell,caption=&quot;SCDC on SCDC GEP-RMSD by celltype&quot;)</code></pre>
-<div id="htmlwidget-e6b9c9c5e93a82fa72ff" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-e6b9c9c5e93a82fa72ff">{"x":{"filter":"none","caption":"<caption>SCDC on SCDC GEP-RMSD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["blood.vessel.endothelial.cell","enteroendocrine.cell","fibroblast","macrophage","pancreatic.A.cell","pancreatic.acinar.cell","pancreatic.D.cell","pancreatic.ductal.cell","PP.cell","type.B.pancreatic.cell"],[0.0165415010839809,0.0851515490252532,0.0170300524784883,0.00368430950364112,0.0472648535839052,0.0585484170897425,0.0288575534289092,0.0886337154602323,0.037621251954869,0.0439095379970598]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster.id<\/th>\n      <th>sqrt(mean((measured - prediction)^2))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-dee80dd3067b499ea1a5" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-dee80dd3067b499ea1a5">{"x":{"filter":"none","caption":"<caption>SCDC on SCDC GEP-RMSD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["blood.vessel.endothelial.cell","enteroendocrine.cell","fibroblast","macrophage","pancreatic.A.cell","pancreatic.acinar.cell","pancreatic.D.cell","pancreatic.ductal.cell","PP.cell","type.B.pancreatic.cell"],[0.0165415010839809,0.0851515490252532,0.0170300524784883,0.00368430950364112,0.0472648535839052,0.0585484170897425,0.0288575534289092,0.0886337154602323,0.037621251954869,0.0439095379970598]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster.id<\/th>\n      <th>sqrt(mean((measured - prediction)^2))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>DT::datatable(madcell,caption=&quot;SCDC on SCDC GEP-mAD by celltype&quot;)</code></pre>
-<div id="htmlwidget-1d60320c7d8c3a06a5a8" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-1d60320c7d8c3a06a5a8">{"x":{"filter":"none","caption":"<caption>SCDC on SCDC GEP-mAD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["blood.vessel.endothelial.cell","enteroendocrine.cell","fibroblast","macrophage","pancreatic.A.cell","pancreatic.acinar.cell","pancreatic.D.cell","pancreatic.ductal.cell","PP.cell","type.B.pancreatic.cell"],[0.0100149481112484,0.0738275497161701,0.013757719950758,0.00205826377087019,0.0406139082381931,0.0311131005470199,0.0227633277311253,0.0781165470427004,0.0308032112148952,0.031862685287439]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster.id<\/th>\n      <th>mean(abs(measured - prediction))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-92581dc2d5bb60c254d0" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-92581dc2d5bb60c254d0">{"x":{"filter":"none","caption":"<caption>SCDC on SCDC GEP-mAD by celltype<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10"],["blood.vessel.endothelial.cell","enteroendocrine.cell","fibroblast","macrophage","pancreatic.A.cell","pancreatic.acinar.cell","pancreatic.D.cell","pancreatic.ductal.cell","PP.cell","type.B.pancreatic.cell"],[0.0100149481112484,0.0738275497161701,0.013757719950758,0.00205826377087019,0.0406139082381931,0.0311131005470199,0.0227633277311253,0.0781165470427004,0.0308032112148952,0.031862685287439]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>cluster.id<\/th>\n      <th>mean(abs(measured - prediction))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>rm(corbycell,rmsdcell, madcell)
 
 
