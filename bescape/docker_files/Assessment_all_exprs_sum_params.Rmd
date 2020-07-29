@@ -10,28 +10,23 @@ output:
       smooth_scroll: false
     number_sections: false
 params:
-   scfilelist: "/pstore/home/kamthont/bescape/docs/datasets/expcp10k_sum/segerstolpe_raw_exp_eset.RDS"
-   scpaperlist: "/pstore/home/kamthont/bescape/docs/datasets/scdc/scdc_paper/segerstolpe.rds"
-   bulkfile: ./data/fadista_77.rds
-   hbulk: ./data/MIX3cl_scESET.rds
+   scfilelist: "../../docs/datasets/expcp10k_sum/segerstolpe_raw_exp_eset.RDS" #files of the scRNASeq
    celltypevar: "cellType" #variable name containing the cell type annot in @phenoData of the eset
    samplevar: "SubjectName" #variable name in @phenoData identifying the sample name
-   name_temp_file: 'temp.txt'
-   truth: "/pstore/home/kamthont/bescape/docs/datasets/expcp10k_sum/truth/truth_segerstolpe_sum.csv"
-   musicbasis: "/pstore/home/kamthont/bescape/docs/datasets/music/Music_SegerBasis_exp_sum.RDS"
-   scdcbasis:  "/pstore/home/kamthont/bescape/docs/datasets/scdc/SCDC_Seger_Basis_exp_sum.RDS"
-   paperbasis: "/pstore/home/kamthont/bescape/docs/datasets/scdc/scdc_paper/SCDC_Seger_Basis.RDS"
-   bescabasis: "/pstore/home/kamthont/bescape/docs/datasets/expcp10k_sum/segerstolpe_gep_sum.csv"
-   real: "/pstore/home/kamthont/bescape/docs/datasets/scdc/pancreatic/fadista_77.rds"
-   SCDCreal: "/pstore/home/kamthont/bescape/docs/datasets/scdc/SCDC_Seger_real_exp_sum.txt"
-   MUSICreal: "/pstore/home/kamthont/bescape/docs/datasets/music/Music_Seger_real_exp_sum.txt"
-   expression_path: "/pstore/home/kamthont/bescape/docs/datasets/expcp10k_sum/simulated/simulated_bulk_segerstolpe_sum.csv"
-   SCDCsim: "/pstore/home/kamthont/bescape/docs/datasets/scdc/SCDC_Seger_sim_exp_sum.txt"
-   MUSICsim: "/pstore/home/kamthont/bescape/docs/datasets/music/MUSIC_Seger_sim_exp_sum.txt"
-   fulleval: FALSE
-   fullevalreal: FALSE
-   bescaname: "HUGO"
-   studyname: "Pancreas"
+   truth: "../../docs/datasets/expcp10k_sum/truth/truth_segerstolpe_sum.csv" #.csv containing the simulated proportions
+   musicbasis: "../../docs/datasets/music/Music_SegerBasis_exp_sum.RDS" #path to store MUSIC basis
+   scdcbasis:  "../../docs/datasets/scdc/SCDC_Seger_Basis_exp_sum.RDS" #path to store SCDC basis
+   bescabasis: "../../docs/datasets/expcp10k_sum/segerstolpe_gep_sum.csv" #path to load besca basis 
+   real: "../../docs/datasets/scdc/pancreatic/fadista_77.rds" #path to load real bulk RNASeq 
+   SCDCreal: "../../docs/datasets/scdc/SCDC_Seger_real_exp_sum.txt" #path to store SCDC estimation from real bulk RNASeq 
+   MUSICreal: "../../docs/datasets/music/Music_Seger_real_exp_sum.txt"#path to store MUSIC estimation from real  bulk RNASeq 
+   expression_path: "../../docs/datasets/expcp10k_sum/simulated/simulated_bulk_segerstolpe_sum.csv"#path to load simulated bulk RNASeq 
+   SCDCsim: "../../docs/datasets/scdc/SCDC_Seger_sim_exp_sum.txt" #path to store SCDC estimation from simulated bulk RNASeq 
+   MUSICsim: "../../docs/datasets/music/MUSIC_Seger_sim_exp_sum.txt" #path to store Music estimation from simulated bulk RNASeq 
+   fulleval: FALSE #flag to evaluate all cell estimates 
+   fullevalreal: FALSE #flag to evaluate the real bulk RNASeq 
+   bescaname: "HUGO" #flag for gene identification ENS for ensembl
+   studyname: "Pancreas" #study name 
 vignette: >
   %\VignetteIndexEntry{SCDC}
   %\VignetteEngine{knitr::rmarkdown}
@@ -42,7 +37,7 @@ vignette: >
 ## Segerstolpe
 
 ```{r loadLibrary, fig.width=20, fig.height=18,message=FALSE,eval=TRUE}
-.libPaths(c("~/R/x86_64-pc-linux-gnu-library/3.6",.libPaths()))
+#.libPaths(c("~/R/x86_64-pc-linux-gnu-library/3.6",.libPaths()))
 suppressMessages(library(MuSiC))
 suppressMessages(library(BisqueRNA))
 #suppressMessages(library(ganalyse))
@@ -57,7 +52,8 @@ dpispec<-600
 figwspec<-8.5
 fighspec<-17.5
 
-#Music
+test<-params$truth
+print(getwd())
 truth<-read.table(file=params$truth,sep=",",header=TRUE)
 scdata = list(0)
 scfilelist<-params$scfilelist
@@ -67,10 +63,10 @@ for(index in 1:nscdata){
 scdata[[index]]<-readRDS(scfilelist[index])
 }
 #exprs(scdata[[1]])<-exp(exprs(scdata[[1]]))
-scdatapaper=list(0)
-for(index in 1:nscdata){
-scdatapaper[[index]]<-readRDS(params$scpaperlist)
-}
+#scdatapaper=list(0)
+#for(index in 1:nscdata){
+#scdatapaper[[index]]<-readRDS(params$scpaperlist)
+#}
 celltype<-levels(truth$cell.type)
 ```
 ```{r Basis, fig.width=20, fig.height=18,message=FALSE,eval=params$fulleval}
@@ -135,11 +131,11 @@ heatmap.2(as.matrix(besca_basis%>% dplyr::select(-name)),labRow=FALSE,main="BESC
 #dev.off()
 
 #pdf(paste0("./figures/",params$studyname,"Mergedbases.pdf"))
-heatmap.2(as.matrix(merge_allgenes %>% dplyr::select(-name)),labRow=FALSE,main="MUSIC SCDC BESCA GEPs\n All Genes",col=bluered(100), trace="none",scale="row",xlab="Celltypes",cexCol=0.4,srtCol=45,key.par=list(cex=0.5))
+#heatmap.2(as.matrix(merge_allgenes %>% dplyr::select(-name)),labRow=FALSE,main="MUSIC SCDC BESCA GEPs\n All Genes",col=bluered(100), trace="none",scale="row",xlab="Celltypes",cexCol=0.4,srtCol=45,key.par=list(cex=0.5))
 #dev.off()
 
 #pdf(paste0("./figures/",params$studyname,"Mergedbases_subset.pdf"))
-heatmap.2(as.matrix(merge_justBESCAgenes%>% dplyr::select(-name)),labRow=FALSE,main="MUSIC SCDC BESCA GEPs \n BESCA Genes",col=bluered(100), trace="none",scale="row",xlab="Celltypes",cexCol=0.4,srtCol=45,key.par=list(cex=0.5))
+#heatmap.2(as.matrix(merge_justBESCAgenes%>% dplyr::select(-name)),labRow=FALSE,main="MUSIC SCDC BESCA GEPs \n BESCA Genes",col=bluered(100), trace="none",scale="row",xlab="Celltypes",cexCol=0.4,srtCol=45,key.par=list(cex=0.5))
 #dev.off()
 
 ```
@@ -176,7 +172,7 @@ result_matrix <-  as.data.frame(ens$prop.est)
 write.table(result_matrix,file=params$SCDCreal,row.names=TRUE,col.names=TRUE,sep="\t",quote=FALSE)
 ```
 
-```{r realBulkSCDC2,fig.width=14, fig.height=12,message=TRUE,eval=TRUE}
+```{r realBulkSCDC2,fig.width=14, fig.height=12,message=TRUE,eval=params$fullevalreal}
 bulk <- readRDS(params$real)
 result_matrix<-read.table(file=params$SCDCreal,sep="\t",header=TRUE,row.names=1)
 result_matrix<-cbind(result_matrix,bulk@phenoData@data[match(rownames(bulk@phenoData@data),rownames(result_matrix)),])
@@ -445,37 +441,41 @@ rm(corbycell,rmsdcell, madcell)
 ```
 
 ## Simulated BulkRNASeq using SCDC
-```{r SCDCsimbulk,fig.width=20, fig.height=18,message=FALSE,eval=params$fulleval}
+```{r SCDCsimbulk,fig.width=20, fig.height=18,message=FALSE,eval=TRUE} 
+#params$fulleval}
 ## (1) using all single cells
 pseudo.seger <- generateBulk_allcells(scdata[[1]], ct.varname = "cellType", sample = "SubjectName",ct.sub=NULL)
 
-round(pseudo.seger$truep,3)
+#round(pseudo.seger$truep,3)
 
 bulkseger.scseger <- SCDC_prop(bulk.eset = pseudo.seger$pseudo_eset, sc.eset = scdata[[1]], ct.varname = "cellType",ct.sub=celltype, sample = "SubjectName", truep = pseudo.seger$truep)
 bulkseger.scseger$peval$evals.table
 
 
-write.table(bulkseger.scseger$prop,file=paste0("/pstore/home/kamthont/bescape/docs/datasets/scdc/",params$studyname,"SCDC_Seger_SimBulk_exp_sum.txt"),row.names=TRUE,col.names=TRUE,quote=FALSE,sep="\t")
-save(pseudo.seger,file=paste0("/pstore/home/kamthont/bescape/docs/datasets/scdc/",params$studyname,"pseudo_exp_sum.Rdata"))
+write.table(bulkseger.scseger$prop,file=paste0("../../docs/datasets/scdc/",params$studyname,"SCDC_Seger_SimBulk_exp_sum.txt"),row.names=TRUE,col.names=TRUE,quote=FALSE,sep="\t")
+save(pseudo.seger,file=paste0("../../docs/datasets/scdc/",params$studyname,"pseudo_exp_sum.Rdata"))
 
 #MuSIc
-out.prop <- music_prop(bulk.eset =pseudo.seger$pseudo_eset, sc.eset =scdata[[1]], clusters = 'cellType', samples='SubjectName')
+#out.prop <- music_prop(bulk.eset =pseudo.seger$pseudo_eset, sc.eset =scdata[[1]], clusters = 'cellType', samples='SubjectName')
 # write cell fractions into temp file, which is to be loaded by the python wrapper
-out.frac <- out.prop$Est.prop.weighted
+#out.frac <- out.prop$Est.prop.weighted
 
-write.table(out.frac,file=paste0("/pstore/home/kamthont/bescape/docs/datasets/music/",params$studyname,"MUSIC_SimBulk_exp_sum.txt"),sep="\t",col.names=TRUE,row.names=TRUE,quote=FALSE)
+#write.table(out.frac,file=paste0("../../docs/datasets/music/",params$studyname,"MUSIC_SimBulk_exp_sum.txt"),sep="\t",col.names=TRUE,row.names=TRUE,quote=FALSE)
 
 
 
 #SCDC with highly variable genes
 besca<-read.csv(params$bescabasis,sep=",")
 colnames(besca)<-paste0("BESCA_",colnames(besca))
-
+rownames(besca)<-besca$BESCA_NAME
 library(MBbiomart)
 tt<-mb_getGeneInfo(NULL,besca$BESCA_NAME)
 ttunique<-tt[which(duplicated(tt$ensembl_gene_id)==FALSE),]
 
-rownames(besca)<-ttunique$external_gene_name[match(besca$BESCA_NAME,ttunique$ensembl_gene_id)]#change ens to gene symbol
+if(params$bescaname=="ENS"){
+    rownames(besca)<-ttunique$external_gene_name[match(besca$BESCA_NAME,ttunique$ensembl_gene_id)]#change ens to gene symbol
+}
+
 pseudo.seger_high<-pseudo.seger
 pseudo.seger_high$pseudo_eset <- pseudo.seger_high$pseudo_eset[which(rownames(pseudo.seger_high$pseudo_eset) %in% rownames(besca)),]
 
@@ -484,17 +484,17 @@ bulkseger.scseger_high <- SCDC_prop(bulk.eset = pseudo.seger_high$pseudo_eset, s
 bulkseger.scseger_high$peval$evals.table
 
 
-write.table(bulkseger.scseger_high$prop,file=paste0("/pstore/home/kamthont/bescape/docs/datasets/scdc/",params$studyname,"SCDC_Seger_SimBulk_exp_sum_highvar.txt"),row.names=TRUE,col.names=TRUE,quote=FALSE,sep="\t")
-save(pseudo.seger_high,file=paste0("/pstore/home/kamthont/bescape/docs/datasets/scdc/",params$studyname,"pseudo_exp_sum_highvar.Rdata"))
+write.table(bulkseger.scseger_high$prop,file=paste0("../../docs/datasets/scdc/",params$studyname,"SCDC_Seger_SimBulk_exp_sum_highvar.txt"),row.names=TRUE,col.names=TRUE,quote=FALSE,sep="\t")
+save(pseudo.seger_high,file=paste0("../../docs/datasets/scdc/",params$studyname,"pseudo_exp_sum_highvar.Rdata"))
 
 
 ```
 
 ```{r SCDCsimbulk2,fig.width=20, fig.height=18,message=FALSE,eval=TRUE}
-load(file=paste0("/pstore/home/kamthont/bescape/docs/datasets/scdc/",params$studyname,"pseudo_exp_sum.Rdata"))
+load(file=paste0("../../docs/datasets/scdc/",params$studyname,"pseudo_exp_sum.Rdata"))
 
 #Normal SCDC
-result_matrix<-read.table(file=paste0("/pstore/home/kamthont/bescape/docs/datasets/scdc/",params$studyname,"SCDC_Seger_SimBulk_exp_sum.txt"),sep="\t",header=TRUE,row.names=1)
+result_matrix<-read.table(file=paste0("../../docs/datasets/scdc/",params$studyname,"SCDC_Seger_SimBulk_exp_sum.txt"),sep="\t",header=TRUE,row.names=1)
 
 #result_matrix<-bulkseger.scseger$prop
 result_df_wide<- result_matrix %>% 
@@ -541,7 +541,7 @@ rm(corbycell,rmsdcell, madcell)
 
 
 #SCDC with high var
-result_matrix<-read.table(file=paste0("/pstore/home/kamthont/bescape/docs/datasets/scdc/",params$studyname,"SCDC_Seger_SimBulk_exp_sum_highvar.txt"),sep="\t",header=TRUE,row.names=1)
+result_matrix<-read.table(file=paste0("../../docs/datasets/scdc/",params$studyname,"SCDC_Seger_SimBulk_exp_sum_highvar.txt"),sep="\t",header=TRUE,row.names=1)
 
 #result_matrix<-bulkseger.scseger$prop
 result_df_wide<- result_matrix %>% 
@@ -581,43 +581,43 @@ rm(corbycell,rmsdcell, madcell)
 
 
 #Music
-result_matrix<-read.table(file=paste0("/pstore/home/kamthont/bescape/docs/datasets/music/",params$studyname,"MUSIC_SimBulk_exp_sum.txt"),sep="\t",header=TRUE,row.names=1)
-
-#result_matrix<-bulkseger.scseger$prop
-result_df_wide<- result_matrix %>% 
-        as.data.frame() %>% 
-        tibble::rownames_to_column("sample.id")
-result_df_wide$sample.id<-as.factor(result_df_wide$sample.id)
-result_df <- tidyr::gather(result_df_wide,cell.type,prediction,-sample.id,factor_key= TRUE)
-
-
-truthp<-pseudo.seger$truep %>% 
-        as.data.frame()  
-truthp$sample.id<-as.factor(truthp$sample.id)
-#truthp <- tidyr::gather(truthp,cell.type,prediction,-sample.id,factor_key= TRUE)
-
-truthp$cluster.id<-gsub(" ",".",truthp$cluster.id)
-truthp$cluster.id<-gsub("-",".",truthp$cluster.id)
-truthp$ID<-paste0(truthp$sample.id,truthp$cluster.id)
-result_df$ID<-paste0(result_df$sample.id,result_df$cell.type)
-res<-merge(truthp,result_df[,-which(colnames(result_df)=="cell.type")],by="ID")
-res$cell.type<-res$cluster.id
-res$measured<-res$Freq
-ggplot(res,aes(x=prediction,y=measured))+geom_point(aes(size=16))+facet_wrap(.~cell.type,scales="free",nrow=2)+ggtitle(paste0(params$studyname," MUSIC Simulated Bulk from SCDC GEP"))+
-    theme(axis.text=element_text(size=16),
-          strip.text=element_text(size=18),
-          axis.title=element_text(size=24),
-          plot.title=element_text(size=24,face="bold"),
-          legend.position="none") #
-ggsave(paste0("./figures/",params$studyname,"SimBulk_MUSICGEP_SCDC_highvar.svg"))
-
-corbycell<-res %>% group_by(cluster.id) %>% summarize(cor(prediction,measured))
-rmsdcell<-res %>% group_by(cluster.id) %>% summarize(sqrt(mean((measured-prediction)^2)))
-madcell<-res %>% group_by(cluster.id) %>% summarize(mean(abs(measured-prediction)))
-DT::datatable(corbycell,caption="MUSIC on SCDC GEP-Correlation by celltype")
-DT::datatable(rmsdcell,caption="MUSIC on SCDC GEP-RMSD by celltype")
-DT::datatable(madcell,caption="MUSIC on SCDC GEP-mAD by celltype")
-rm(corbycell,rmsdcell, madcell)
+#result_matrix<-read.table(file=paste0("./docs/datasets/music/",params$studyname,"MUSIC_SimBulk_exp_sum.txt"),sep="\t",header=TRUE,row.names=1)
+#
+##result_matrix<-bulkseger.scseger$prop
+#result_df_wide<- result_matrix %>% 
+#        as.data.frame() %>% 
+#        tibble::rownames_to_column("sample.id")
+#result_df_wide$sample.id<-as.factor(result_df_wide$sample.id)
+#result_df <- tidyr::gather(result_df_wide,cell.type,prediction,-sample.id,factor_key= TRUE)
+#
+#
+#truthp<-pseudo.seger$truep %>% 
+#        as.data.frame()  
+#truthp$sample.id<-as.factor(truthp$sample.id)
+##truthp <- tidyr::gather(truthp,cell.type,prediction,-sample.id,factor_key= TRUE)
+#
+#truthp$cluster.id<-gsub(" ",".",truthp$cluster.id)
+#truthp$cluster.id<-gsub("-",".",truthp$cluster.id)
+#truthp$ID<-paste0(truthp$sample.id,truthp$cluster.id)
+#result_df$ID<-paste0(result_df$sample.id,result_df$cell.type)
+#res<-merge(truthp,result_df[,-which(colnames(result_df)=="cell.type")],by="ID")
+#res$cell.type<-res$cluster.id
+#res$measured<-res$Freq
+#ggplot(res,aes(x=prediction,y=measured))+geom_point(aes(size=16))+facet_wrap(.~cell.type,scales="free",nrow=2)+ggtitle(paste0(params$studyname," MUSIC Simulated Bulk from SCDC GEP"))+
+#    theme(axis.text=element_text(size=16),
+#          strip.text=element_text(size=18),
+#          axis.title=element_text(size=24),
+#          plot.title=element_text(size=24,face="bold"),
+#          legend.position="none") #
+#ggsave(paste0("./figures/",params$studyname,"SimBulk_MUSICGEP_SCDC_highvar.svg"))
+#
+#corbycell<-res %>% group_by(cluster.id) %>% summarize(cor(prediction,measured))
+#rmsdcell<-res %>% group_by(cluster.id) %>% summarize(sqrt(mean((measured-prediction)^2)))
+#madcell<-res %>% group_by(cluster.id) %>% summarize(mean(abs(measured-prediction)))
+#DT::datatable(corbycell,caption="MUSIC on SCDC GEP-Correlation by celltype")
+#DT::datatable(rmsdcell,caption="MUSIC on SCDC GEP-RMSD by celltype")
+#DT::datatable(madcell,caption="MUSIC on SCDC GEP-mAD by celltype")
+#rm(corbycell,rmsdcell, madcell)
 
 ```
 
