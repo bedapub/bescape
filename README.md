@@ -12,7 +12,7 @@ Currently supported deconvolution methods:
 [bescape summary]: https://github.com/bedapub/bescape/blob/master/docs/fig/bescape_summary_hires.png "BESCApe summary figure"
 
 ## Example Usage
-A more detailed guide on example use and integration with [BESCA](https://github.com/bedapub/besca) is available [here](docs/bescape_tutorial.ipynb)
+A more detailed guide on example use and integration with [BESCA](https://github.com/bedapub/besca) is available in a [notebook here](docs/bescape_tutorial.ipynb). A tutorial for converting AnnData to ExpressionSet is available [here](https://github.com/bedapub/bescape/blob/master/docs/adata_to_eset.ipynb).
 
 ```python
 import os
